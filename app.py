@@ -14,6 +14,17 @@ import docx
 import os, re, io, zipfile, shutil
 import json
 
+# Try to import optional dependencies for Render compatibility
+try:
+    import fitz  # PyMuPDF - for PDF to Image (no external dependencies)
+except ImportError:
+    fitz = None
+
+try:
+    import easyocr  # For OCR (no Tesseract needed)
+except ImportError:
+    easyocr = None
+
 # --- LinkedIn Optimizer import HATAYA ---
 # from linkedin_optimizer import analyze_linkedin_profile, fetch_profile_from_url
 
@@ -216,50 +227,65 @@ def export_resume_docx():
 # ─────────────────────────────────────────
 @app.route('/word-to-pdf', methods=['POST'])
 def word_to_pdf():
-    p = save(request.files['file'], 'input.docx')
-    docx_to_pdf(p, os.path.join(UPLOAD,'output.pdf'))
-    return send_file(os.path.join(UPLOAD,'output.pdf'), as_attachment=True, download_name='converted.pdf')
+    try:
+        p = save(request.files['file'], 'input.docx')
+        docx_to_pdf(p, os.path.join(UPLOAD,'output.pdf'))
+        return send_file(os.path.join(UPLOAD,'output.pdf'), as_attachment=True, download_name='converted.pdf')
+    except Exception as e:
+        return jsonify({'error': f'Word to PDF failed: {str(e)}'}), 500
 
 @app.route('/pdf-to-word', methods=['POST'])
 def pdf_to_word():
-    p = save(request.files['file'], 'input.pdf')
-    cv = PDFToWordConverter(p)
-    out = os.path.join(UPLOAD,'output.docx')
-    cv.convert(out); cv.close()
-    return send_file(out, as_attachment=True, download_name='converted.docx')
+    try:
+        p = save(request.files['file'], 'input.pdf')
+        cv = PDFToWordConverter(p)
+        out = os.path.join(UPLOAD,'output.docx')
+        cv.convert(out); cv.close()
+        return send_file(out, as_attachment=True, download_name='converted.docx')
+    except Exception as e:
+        return jsonify({'error': f'PDF to Word failed: {str(e)}'}), 500
 
 @app.route('/ppt-to-pdf', methods=['POST'])
 def ppt_to_pdf():
-    p = save(request.files['file'], 'input.pptx')
-    import comtypes.client
-    ppt = comtypes.client.CreateObject("Powerpoint.Application")
-    ppt.Visible = 1
-    deck = ppt.Presentations.Open(os.path.abspath(p))
-    out  = os.path.abspath(os.path.join(UPLOAD,'output.pdf'))
-    deck.SaveAs(out, 32); deck.Close(); ppt.Quit()
-    return send_file(out, as_attachment=True, download_name='converted.pdf')
+    try:
+        p = save(request.files['file'], 'input.pptx')
+        import comtypes.client
+        ppt = comtypes.client.CreateObject("Powerpoint.Application")
+        ppt.Visible = 1
+        deck = ppt.Presentations.Open(os.path.abspath(p))
+        out  = os.path.abspath(os.path.join(UPLOAD,'output.pdf'))
+        deck.SaveAs(out, 32); deck.Close(); ppt.Quit()
+        return send_file(out, as_attachment=True, download_name='converted.pdf')
+    except Exception as e:
+        return jsonify({'error': f'PPT to PDF failed: {str(e)}'}), 500
 
 @app.route('/excel-to-pdf', methods=['POST'])
 def excel_to_pdf():
-    p = save(request.files['file'], 'input.xlsx')
-    import comtypes.client
-    xl  = comtypes.client.CreateObject("Excel.Application")
-    xl.Visible = 0
-    wb  = xl.Workbooks.Open(os.path.abspath(p))
-    out = os.path.abspath(os.path.join(UPLOAD,'output.pdf'))
-    wb.ExportAsFixedFormat(0, out); wb.Close(False); xl.Quit()
-    return send_file(out, as_attachment=True, download_name='converted.pdf')
+    try:
+        p = save(request.files['file'], 'input.xlsx')
+        import comtypes.client
+        xl  = comtypes.client.CreateObject("Excel.Application")
+        xl.Visible = 0
+        wb  = xl.Workbooks.Open(os.path.abspath(p))
+        out = os.path.abspath(os.path.join(UPLOAD,'output.pdf'))
+        wb.ExportAsFixedFormat(0, out); wb.Close(False); xl.Quit()
+        return send_file(out, as_attachment=True, download_name='converted.pdf')
+    except Exception as e:
+        return jsonify({'error': f'Excel to PDF failed: {str(e)}'}), 500
 
 @app.route('/rtf-to-docx', methods=['POST'])
 def rtf_to_docx():
-    p = save(request.files['file'], 'input.rtf')
-    import comtypes.client
-    word = comtypes.client.CreateObject("Word.Application")
-    word.Visible = 0
-    doc  = word.Documents.Open(os.path.abspath(p))
-    out  = os.path.abspath(os.path.join(UPLOAD,'output.docx'))
-    doc.SaveAs2(out, 16); doc.Close(); word.Quit()
-    return send_file(out, as_attachment=True, download_name='converted.docx')
+    try:
+        p = save(request.files['file'], 'input.rtf')
+        import comtypes.client
+        word = comtypes.client.CreateObject("Word.Application")
+        word.Visible = 0
+        doc  = word.Documents.Open(os.path.abspath(p))
+        out  = os.path.abspath(os.path.join(UPLOAD,'output.docx'))
+        doc.SaveAs2(out, 16); doc.Close(); word.Quit()
+        return send_file(out, as_attachment=True, download_name='converted.docx')
+    except Exception as e:
+        return jsonify({'error': f'RTF to DOCX failed: {str(e)}'}), 500
 
 # ─────────────────────────────────────────
 #  PDF TOOLS
@@ -414,21 +440,26 @@ def extract_pages():
         writer.write(f)
     return send_file(out, as_attachment=True, download_name='extracted_pages.pdf')
 
+# ─────────────────────────────────────────
+#  PDF TO IMAGE - Using PyMuPDF (No system dependencies)
+# ─────────────────────────────────────────
 @app.route('/pdf-to-image', methods=['POST'])
 def pdf_to_image():
     try:
-        from pdf2image import convert_from_path
-        p      = save(request.files['file'], 'input.pdf')
-        images = convert_from_path(p)
-        zpath  = os.path.join(UPLOAD,'pdf_images.zip')
-        with zipfile.ZipFile(zpath,'w') as zf:
-            for i, img in enumerate(images):
+        import fitz
+        p = save(request.files['file'], 'input.pdf')
+        doc = fitz.open(p)
+        zpath = os.path.join(UPLOAD, 'pdf_images.zip')
+        with zipfile.ZipFile(zpath, 'w') as zf:
+            for i, page in enumerate(doc):
+                pix = page.get_pixmap()
                 ipath = os.path.join(UPLOAD, f'page_{i+1}.jpg')
-                img.save(ipath,'JPEG')
+                pix.save(ipath)
                 zf.write(ipath, f'page_{i+1}.jpg')
+        doc.close()
         return send_file(zpath, as_attachment=True, download_name='pdf_images.zip')
-    except:
-        return jsonify({'error':'pdf2image install karo: pip install pdf2image'}), 500
+    except Exception as e:
+        return jsonify({'error': f'PDF to Image failed: {str(e)}. Try: pip install PyMuPDF'}), 500
 
 @app.route('/pdf-to-txt', methods=['POST'])
 def pdf_to_txt():
@@ -483,6 +514,62 @@ def image_to_pdf():
     img.save(out,'PDF')
     return send_file(out, as_attachment=True, download_name='converted.pdf')
 
+# ─────────────────────────────────────────
+#  IMAGE TO WORD - Using EasyOCR (No Tesseract needed)
+# ─────────────────────────────────────────
+@app.route('/image-to-word', methods=['POST'])
+def image_to_word():
+    try:
+        import easyocr
+        p = save(request.files['file'], 'input_img.png')
+        reader = easyocr.Reader(['en'])
+        result = reader.readtext(p)
+        text = ' '.join([item[1] for item in result])
+        
+        d = docx.Document()
+        d.add_heading('Extracted Text', 0)
+        for line in text.split('\n'):
+            if line.strip():
+                d.add_paragraph(line.strip())
+        out = os.path.join(UPLOAD, 'output.docx')
+        d.save(out)
+        return send_file(out, as_attachment=True, download_name='converted.docx')
+    except Exception as e:
+        return jsonify({'error': f'OCR to Word failed: {str(e)}. Try: pip install easyocr'}), 500
+
+@app.route('/image-to-excel', methods=['POST'])
+def image_to_excel():
+    try:
+        import easyocr
+        p = save(request.files['file'], 'input_img.png')
+        reader = easyocr.Reader(['en'])
+        result = reader.readtext(p)
+        text = ' '.join([item[1] for item in result])
+        
+        lines = [l.strip() for l in text.split('\n') if l.strip()]
+        rows = [re.split(r'\t|  {2,}', l) for l in lines]
+        out = os.path.join(UPLOAD, 'output.xlsx')
+        pd.DataFrame(rows).to_excel(out, index=False, header=False)
+        return send_file(out, as_attachment=True, download_name='converted.xlsx')
+    except Exception as e:
+        return jsonify({'error': f'OCR to Excel failed: {str(e)}. Try: pip install easyocr'}), 500
+
+@app.route('/ocr-to-text', methods=['POST'])
+def ocr_to_text():
+    try:
+        import easyocr
+        p = save(request.files['file'], 'input_img.png')
+        reader = easyocr.Reader(['en'])
+        result = reader.readtext(p)
+        text = ' '.join([item[1] for item in result])
+        
+        out = os.path.join(UPLOAD, 'ocr_output.txt')
+        with open(out, 'w', encoding='utf-8') as f:
+            f.write(text)
+        return send_file(out, as_attachment=True, download_name='ocr_text.txt')
+    except Exception as e:
+        return jsonify({'error': f'OCR to Text failed: {str(e)}. Try: pip install easyocr'}), 500
+
 @app.route('/jpg-to-png', methods=['POST'])
 def jpg_to_png():
     p   = save(request.files['file'], 'input.jpg')
@@ -503,6 +590,17 @@ def webp_to_png():
     out = os.path.join(UPLOAD,'output.png')
     Image.open(p).save(out,'PNG')
     return send_file(out, as_attachment=True, download_name='converted.png')
+
+@app.route('/svg-to-png', methods=['POST'])
+def svg_to_png():
+    try:
+        import cairosvg
+        p   = save(request.files['file'], 'input.svg')
+        out = os.path.join(UPLOAD,'output.png')
+        cairosvg.svg2png(url=p, write_to=out)
+        return send_file(out, as_attachment=True, download_name='converted.png')
+    except Exception as e:
+        return jsonify({'error': f'SVG to PNG failed: {str(e)}. Try: pip install cairosvg'}), 500
 
 @app.route('/compress-image', methods=['POST'])
 def compress_image():
@@ -579,6 +677,34 @@ def make_resume():
             story += [Paragraph(p.get('title',''),bold_s), Paragraph(p.get('description',''),body_s), Spacer(1,4)]
     doc.build(story)
     return send_file(out, as_attachment=True, download_name='my_resume.pdf')
+
+# ─────────────────────────────────────────
+#  LINKEDIN - File Upload API
+# ─────────────────────────────────────────
+@app.route('/upload-linkedin-file', methods=['POST'])
+def upload_linkedin_file():
+    try:
+        file = request.files['file']
+        if not file:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        filename = file.filename
+        ext = filename.rsplit('.', 1)[-1].lower()
+        path = save(file, filename)
+        
+        if ext == 'pdf':
+            text = extract_text_from_pdf(path)
+        elif ext == 'docx':
+            text = extract_text_from_docx(path)
+        elif ext == 'txt':
+            with open(path, 'r', encoding='utf-8') as f:
+                text = f.read()
+        else:
+            return jsonify({'error': 'Unsupported file type'}), 400
+        
+        return jsonify({'text': text})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # ─────────────────────────────────────────
 #  RUN SERVER ON PORT 5001
