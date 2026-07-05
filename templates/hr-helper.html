@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FatalIQ-AI | HR Helper - Bulk Resume Screening</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; }
+        
+        /* Navbar */
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); padding: 0.8rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(102,126,234,0.1); }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.3s; font-size: 0.9rem; }
+        .nav-links a:hover { background: #f0f4ff; color: #667eea; }
+        .nav-links a.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+        
+        /* Page Header */
+        .page-header { text-align: center; margin-bottom: 2rem; padding: 1rem; }
+        .page-header h1 { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; }
+        .page-header p { color: #64748b; font-size: 1rem; margin-top: 0.25rem; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 20px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 1.5rem; border: 1px solid rgba(226,232,240,0.5); transition: all 0.3s; }
+        .card:hover { box-shadow: 0 8px 40px rgba(0,0,0,0.08); }
+        
+        /* Upload Zone */
+        .upload-zone { border: 2px dashed #e2e8f0; border-radius: 16px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s; background: #fafbff; }
+        .upload-zone:hover { border-color: #667eea; background: #f5f3ff; transform: translateY(-2px); }
+        .upload-zone .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .upload-zone p { font-size: 0.95rem; color: #475569; }
+        .upload-zone small { font-size: 0.75rem; color: #94a3b8; }
+        
+        textarea { width: 100%; min-height: 100px; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.875rem; font-family: inherit; resize: vertical; transition: all 0.3s; background: #fafbff; }
+        textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); background: white; }
+        
+        /* Filter Row */
+        .filter-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; background: #f8fafc; padding: 1rem; border-radius: 14px; }
+        .filter-row label { font-size: 0.8rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 0.5rem; }
+        .filter-row input[type="range"] { accent-color: #667eea; cursor: pointer; }
+        .filter-row select { padding: 0.4rem 0.8rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.8rem; background: white; cursor: pointer; }
+        
+        /* Buttons */
+        .btn { padding: 0.5rem 1.2rem; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+        .btn-success:hover { transform: translateY(-2px); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 4px 15px rgba(239,68,68,0.3); }
+        .btn-danger:hover { transform: translateY(-2px); }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
+        .btn-warning:hover { transform: translateY(-2px); }
+        .btn-outline { background: white; border: 2px solid #667eea; color: #667eea; }
+        .btn-outline:hover { background: #667eea; color: white; transform: translateY(-2px); }
+        .btn-sm { padding: 0.25rem 0.7rem; font-size: 0.7rem; border-radius: 8px; }
+        .btn-glow { animation: glow 2s infinite; }
+        @keyframes glow { 0%,100% { box-shadow: 0 4px 15px rgba(102,126,234,0.3); } 50% { box-shadow: 0 4px 30px rgba(102,126,234,0.6); } }
+        
+        /* Stats Row */
+        .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .stat-box { background: white; border-radius: 16px; padding: 1rem 1.5rem; text-align: center; flex: 1; min-width: 100px; cursor: pointer; transition: all 0.3s; border: 1px solid rgba(226,232,240,0.5); box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .stat-box:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .stat-box .num { font-size: 1.8rem; font-weight: 800; }
+        .stat-box .lbl { font-size: 0.7rem; color: #64748b; font-weight: 500; }
+        .stat-box.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
+        .stat-box.active .lbl { color: rgba(255,255,255,0.8); }
+        
+        /* Charts */
+        .chart-container { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .chart-card { background: white; border-radius: 16px; padding: 1.2rem; flex: 1; min-width: 200px; border: 1px solid rgba(226,232,240,0.5); box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .chart-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem; color: #475569; }
+        .progress-bar-chart { background: #f1f5f9; border-radius: 999px; height: 28px; overflow: hidden; margin: 0.25rem 0; transition: all 0.3s; }
+        .progress-bar-chart:hover { transform: scaleX(1.02); }
+        .progress-fill-chart { height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.75rem; color: white; font-size: 0.7rem; font-weight: 600; border-radius: 999px; transition: width 1s ease; }
+        
+        /* Table */
+        .table-wrapper { overflow-x: auto; border-radius: 16px; border: 1px solid rgba(226,232,240,0.5); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #f8fafc; padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:hover td { background: #f8faff; }
+        tr:last-child td { border-bottom: none; }
+        
+        .score-badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: 600; font-size: 0.7rem; display: inline-block; }
+        .score-excellent { background: #d1fae5; color: #065f46; }
+        .score-good { background: #fef3c7; color: #92400e; }
+        .score-low { background: #fee2e2; color: #991b1b; }
+        
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.65rem; font-weight: 600; }
+        .status-shortlisted { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        
+        .progress-bar { background: #e2e8f0; border-radius: 999px; height: 6px; overflow: hidden; margin: 0.5rem 0; }
+        .progress-fill { height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 999px; width: 0%; transition: width 0.8s ease; }
+        
+        /* Bulk Actions */
+        .bulk-actions { background: #eef2ff; border-radius: 14px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; display: none; align-items: center; gap: 1rem; flex-wrap: wrap; border: 1px solid #c7d2fe; }
+        .bulk-actions span { font-weight: 600; color: #4f46e5; font-size: 0.85rem; }
+        
+        /* Checkbox */
+        .checkbox { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-content { background: white; border-radius: 24px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-header h3 { font-size: 1.3rem; font-weight: 700; }
+        .close-btn { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .close-btn:hover { background: #fee2e2; color: #ef4444; transform: rotate(90deg); }
+        
+        #fileCount { margin-top: 0.5rem; font-size: 0.8rem; color: #667eea; font-weight: 500; }
+        
+        @media (max-width: 768px) { .container { padding: 1rem; } table { font-size: 0.7rem; } .filter-row { flex-direction: column; align-items: stretch; } .stat-box { min-width: 80px; padding: 0.75rem; } .page-header h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">FatalIQ-AI</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/converter">Converter</a>
+                <a href="/resume-ats">Resume Builder & ATS</a>
+                <a href="/hr-helper" class="active">HR Helper</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>👥 HR Helper</h1>
+            <p>Upload resumes, screen against job description, shortlist candidates instantly</p>
+        </div>
+
+        <div class="card">
+            <div class="upload-zone" onclick="document.getElementById('bulkFiles').click()">
+                <div class="icon">📁</div>
+                <p><strong>Click or drag & drop</strong> resumes (PDF/DOCX)</p>
+                <small>Max 300 files supported</small>
+                <input type="file" id="bulkFiles" accept=".pdf,.docx" multiple style="display:none" onchange="handleFiles(this.files)">
+            </div>
+            <div id="fileCount"></div>
+
+            <label style="margin-top:1rem; display:block; font-weight:600; font-size:0.85rem; color:#475569;">📝 Job Description</label>
+            <textarea id="jobDesc" placeholder="Paste job description here..."></textarea>
+
+            <div class="filter-row">
+                <label>🎯 Min Score: <input type="range" id="minScore" min="0" max="90" value="20" step="1" oninput="updateFilter()"> <span id="minScoreVal" style="font-weight:700; color:#667eea;">20%</span></label>
+                <label>📊 Status: <select id="statusFilter" onchange="renderTable()"><option value="all">All</option><option value="shortlisted">⭐ Shortlisted</option><option value="rejected">❌ Rejected</option><option value="pending">⏳ Pending</option></select></label>
+                <label>🔽 Sort: <select id="sortOrder" onchange="renderTable()"><option value="desc">Highest First</option><option value="asc">Lowest First</option></select></label>
+                <button class="btn btn-primary btn-glow" id="scanBtn" onclick="startBulkScan()">🚀 Start Screening</button>
+            </div>
+
+            <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
+            <div id="processingInfo" style="font-size:0.8rem; text-align:center; display:none; color:#667eea; font-weight:500;"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" id="statsRow" style="display:none;"></div>
+        
+        <!-- Charts -->
+        <div class="chart-container" id="chartContainer" style="display:none;">
+            <div class="chart-card">
+                <div class="chart-title">📊 Score Distribution</div>
+                <div id="scoreChart"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">📈 Summary</div>
+                <div id="summaryChart"></div>
+            </div>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions" id="bulkActionsBar">
+            <span id="selectedCount">0 selected</span>
+            <button class="btn btn-success btn-sm" onclick="bulkShortlist()">⭐ Shortlist</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkReject()">🗑️ Reject</button>
+            <button class="btn btn-primary btn-sm" onclick="bulkEmail()">📧 Email</button>
+            <button class="btn btn-outline btn-sm" onclick="clearSelection()">Clear</button>
+            <button class="btn btn-outline btn-sm" onclick="downloadCSV()">⬇️ CSV</button>
+        </div>
+
+        <!-- Results Table -->
+        <div id="resultsDiv" style="display:none;">
+            <div class="table-wrapper">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
+                            <th style="width:50px;">#</th>
+                            <th>Resume File</th>
+                            <th style="width:100px;">ATS Score</th>
+                            <th style="width:80px;">Matched</th>
+                            <th style="width:80px;">Missing</th>
+                            <th style="width:130px;">Status</th>
+                            <th style="width:160px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidate Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>📄 Candidate Details</h3><button class="close-btn" onclick="closeDetailModal()">✕</button></div>
+            <div id="detailContent"></div>
+            <div style="margin-top:1rem;">
+                <label style="font-weight:600; font-size:0.85rem; color:#475569;">📝 Internal Notes:</label>
+                <textarea id="candidateNotes" rows="3" style="width:100%; margin-top:0.25rem; border:2px solid #e2e8f0; border-radius:12px; padding:0.75rem; font-family:inherit; resize:vertical;" placeholder="Add notes about this candidate..."></textarea>
+                <button class="btn btn-primary btn-sm" onclick="saveNotes()" style="margin-top:0.5rem;">💾 Save Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>📧 Send Email</h3><button class="close-btn" onclick="closeEmailModal()">✕</button></div>
+            <div id="emailContent"></div>
+            <div style="margin-top:1rem;">
+                <label style="font-weight:600; font-size:0.85rem; color:#475569;">Subject:</label>
+                <input type="text" id="emailSubject" style="width:100%; padding:0.6rem 0.75rem; border:2px solid #e2e8f0; border-radius:12px; margin-bottom:0.5rem;" value="Interview Invitation">
+                <label style="font-weight:600; font-size:0.85rem; color:#475569;">Message:</label>
+                <textarea id="emailMessage" rows="5" style="width:100%; padding:0.6rem 0.75rem; border:2px solid #e2e8f0; border-radius:12px; font-family:inherit; resize:vertical;"></textarea>
+                <button class="btn btn-primary btn-sm" onclick="sendEmails()" style="margin-top:0.5rem;">📧 Send Emails</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let bulkResults = [];
+        let candidateStatus = {};
+        let candidateNotes = {};
+        let selectedCandidates = new Set();
+        
+        function handleFiles(files) {
+            selectedFiles = Array.from(files).filter(f => f.name.match(/\.(pdf|docx)$/i)).slice(0, 300);
+            document.getElementById('fileCount').innerHTML = `✅ ${selectedFiles.length} resume(s) selected`;
+        }
+        
+        async function startBulkScan() {
+            if (!selectedFiles.length) { alert('Please select resumes first!'); return; }
+            const jobDesc = document.getElementById('jobDesc').value.trim();
+            if (!jobDesc) { alert('Please paste job description!'); return; }
+
+            document.getElementById('scanBtn').disabled = true;
+            document.getElementById('scanBtn').textContent = '⏳ Scanning...';
+            document.getElementById('progressBar').style.display = 'block';
+            document.getElementById('processingInfo').style.display = 'block';
+            document.getElementById('resultsDiv').style.display = 'none';
+            document.getElementById('statsRow').style.display = 'none';
+            document.getElementById('chartContainer').style.display = 'none';
+            bulkResults = [];
+            candidateStatus = {};
+            candidateNotes = {};
+            selectedCandidates.clear();
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                document.getElementById('processingInfo').innerHTML = `Processing ${i+1} of ${selectedFiles.length}: ${file.name}`;
+                document.getElementById('progressFill').style.width = `${((i+1)/selectedFiles.length)*100}%`;
+
+                const formData = new FormData();
+                formData.append('resume', file);
+                formData.append('job_desc', jobDesc);
+
+                try {
+                    const res = await fetch('/ats-score', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    bulkResults.push({
+                        id: i,
+                        name: data.filename || file.name,
+                        score: data.score || 0,
+                        matched: data.matched || [],
+                        missing: data.missing || [],
+                        status: candidateStatus[file.name] || 'pending',
+                        notes: candidateNotes[file.name] || '',
+                        file: file
+                    });
+                } catch(e) {
+                    bulkResults.push({
+                        id: i,
+                        name: file.name,
+                        score: 0,
+                        matched: [],
+                        missing: [],
+                        status: 'pending',
+                        notes: '',
+                        file: file
+                    });
+                }
+                await new Promise(r => setTimeout(r, 100));
+            }
+
+            document.getElementById('scanBtn').disabled = false;
+            document.getElementById('scanBtn').textContent = '🚀 Start Screening';
+            document.getElementById('progressBar').style.display = 'none';
+            document.getElementById('processingInfo').style.display = 'none';
+            renderStatsAndCharts();
+            renderTable();
+            document.getElementById('resultsDiv').style.display = 'block';
+        }
+        
+        function renderStatsAndCharts() {
+            const total = bulkResults.length;
+            const shortlisted = bulkResults.filter(r => r.status === 'shortlisted').length;
+            const rejected = bulkResults.filter(r => r.status === 'rejected').length;
+            const pending = total - shortlisted - rejected;
+            const avgScore = Math.round(bulkResults.reduce((s,r)=>s+r.score,0)/total);
+            const topScore = Math.max(...bulkResults.map(r=>r.score));
+            
+            document.getElementById('statsRow').innerHTML = `
+                <div class="stat-box" onclick="filterByStatus('all')"><div class="num">${total}</div><div class="lbl">Total</div></div>
+                <div class="stat-box" onclick="filterByStatus('shortlisted')"><div class="num" style="color:#10b981;">${shortlisted}</div><div class="lbl">⭐ Shortlisted</div></div>
+                <div class="stat-box" onclick="filterByStatus('rejected')"><div class="num" style="color:#ef4444;">${rejected}</div><div class="lbl">❌ Rejected</div></div>
+                <div class="stat-box" onclick="filterByStatus('pending')"><div class="num" style="color:#f59e0b;">${pending}</div><div class="lbl">⏳ Pending</div></div>
+                <div class="stat-box"><div class="num" style="color:#667eea;">${avgScore}%</div><div class="lbl">Average Score</div></div>
+                <div class="stat-box"><div class="num" style="color:#10b981;">${topScore}%</div><div class="lbl">Top Score</div></div>
+            `;
+            document.getElementById('statsRow').style.display = 'flex';
+            
+            const excellent = bulkResults.filter(r => r.score >= 80).length;
+            const good = bulkResults.filter(r => r.score >= 60 && r.score < 80).length;
+            const average = bulkResults.filter(r => r.score >= 40 && r.score < 60).length;
+            const poor = bulkResults.filter(r => r.score < 40).length;
+            
+            document.getElementById('scoreChart').innerHTML = `
+                <div>🌟 Excellent (80-100%) <div class="progress-bar-chart"><div class="progress-fill-chart" style="width:${(excellent/total)*100}%; background:#10b981;">${excellent}</div></div></div>
+                <div>👍 Good (60-79%) <div class="progress-bar-chart"><div class="progress-fill-chart" style="width:${(good/total)*100}%; background:#f59e0b;">${good}</div></div></div>
+                <div>📊 Average (40-59%) <div class="progress-bar-chart"><div class="progress-fill-chart" style="width:${(average/total)*100}%; background:#eab308;">${average}</div></div></div>
+                <div>📉 Poor (0-39%) <div class="progress-bar-chart"><div class="progress-fill-chart" style="width:${(poor/total)*100}%; background:#ef4444;">${poor}</div></div></div>
+            `;
+            
+            document.getElementById('summaryChart').innerHTML = `
+                <div>⭐ Shortlisted: <strong>${shortlisted}</strong></div>
+                <div>⏳ Pending: <strong>${pending}</strong></div>
+                <div>❌ Rejected: <strong>${rejected}</strong></div>
+                <div>📊 Selection Rate: <strong>${Math.round((shortlisted/total)*100)}%</strong></div>
+            `;
+            document.getElementById('chartContainer').style.display = 'flex';
+        }
+        
+        function filterByStatus(status) {
+            document.getElementById('statusFilter').value = status;
+            renderTable();
+        }
+        
+        function renderTable() {
+            const minScore = parseInt(document.getElementById('minScore').value);
+            const sortOrder = document.getElementById('sortOrder').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            let filtered = bulkResults.filter(r => r.score >= minScore);
+            if (statusFilter !== 'all') filtered = filtered.filter(r => r.status === statusFilter);
+            let sorted = [...filtered].sort((a,b) => sortOrder === 'desc' ? b.score - a.score : a.score - b.score);
+            
+            let html = '';
+            sorted.forEach((r, idx) => {
+                let scoreClass = r.score >= 80 ? 'score-excellent' : r.score >= 60 ? 'score-good' : 'score-low';
+                let statusClass = r.status === 'shortlisted' ? 'status-shortlisted' : r.status === 'rejected' ? 'status-rejected' : 'status-pending';
+                let statusText = r.status === 'shortlisted' ? '⭐ Shortlisted' : r.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
+                let isChecked = selectedCandidates.has(r.id);
+                
+                html += `
+                    <tr>
+                        <td><input type="checkbox" class="checkbox" data-id="${r.id}" ${isChecked ? 'checked' : ''} onchange="toggleCandidate(${r.id})"></td>
+                        <td>${idx+1}</td>
+                        <td style="cursor:pointer; color:#667eea; font-weight:500;" onclick="showCandidateDetail(${r.id})">📄 ${r.name}</td>
+                        <td><span class="score-badge ${scoreClass}">${r.score}%</span></td>
+                        <td>${r.matched.length}</td>
+                        <td>${r.missing.length}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="updateStatus(${r.id}, 'shortlisted')" title="Shortlist">⭐</button>
+                            <button class="btn btn-warning btn-sm" onclick="updateStatus(${r.id}, 'pending')" title="Pending">⏳</button>
+                            <button class="btn btn-danger btn-sm" onclick="updateStatus(${r.id}, 'rejected')" title="Reject">🗑️</button>
+                            <button class="btn btn-outline btn-sm" onclick="showCandidateDetail(${r.id})" title="View Details">📋</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('tableBody').innerHTML = html;
+            updateBulkActionsBar();
+        }
+        
+        function toggleCandidate(id) {
+            if (selectedCandidates.has(id)) selectedCandidates.delete(id);
+            else selectedCandidates.add(id);
+            updateBulkActionsBar();
+        }
+        
+        function toggleSelectAll() {
+            const checkbox = document.getElementById('selectAllCheckbox');
+            const minScore = parseInt(document.getElementById('minScore').value);
+            const statusFilter = document.getElementById('statusFilter').value;
+            let filtered = bulkResults.filter(r => r.score >= minScore);
+            if (statusFilter !== 'all') filtered = filtered.filter(r => r.status === statusFilter);
+            if (checkbox.checked) filtered.forEach(r => selectedCandidates.add(r.id));
+            else filtered.forEach(r => selectedCandidates.delete(r.id));
+            renderTable();
+        }
+        
+        function updateBulkActionsBar() {
+            const count = selectedCandidates.size;
+            document.getElementById('selectedCount').innerHTML = `${count} selected`;
+            document.getElementById('bulkActionsBar').style.display = count > 0 ? 'flex' : 'none';
+        }
+        
+        function clearSelection() { selectedCandidates.clear(); renderTable(); }
+        
+        function updateStatus(id, status) {
+            const candidate = bulkResults.find(r => r.id == id);
+            if (candidate) { candidate.status = status; candidateStatus[candidate.name] = status; renderStatsAndCharts(); renderTable(); }
+        }
+        
+        function bulkShortlist() { selectedCandidates.forEach(id => { const c = bulkResults.find(r => r.id == id); if(c) c.status = 'shortlisted'; }); renderStatsAndCharts(); renderTable(); clearSelection(); }
+        function bulkReject() { selectedCandidates.forEach(id => { const c = bulkResults.find(r => r.id == id); if(c) c.status = 'rejected'; }); renderStatsAndCharts(); renderTable(); clearSelection(); }
+        
+        let currentDetailCandidate = null;
+        async function showCandidateDetail(id) {
+            const candidate = bulkResults.find(r => r.id == id);
+            if (!candidate) return;
+            currentDetailCandidate = candidate;
+            
+            let resumeText = 'Unable to extract resume text.';
+            try {
+                const formData = new FormData();
+                formData.append('file', candidate.file);
+                const res = await fetch('/upload-linkedin-file', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.text) resumeText = data.text.substring(0, 1000);
+            } catch(e) {}
+            
+            document.getElementById('detailContent').innerHTML = `
+                <div><strong>📄 File:</strong> ${candidate.name}</div>
+                <div><strong>🎯 Score:</strong> ${candidate.score}%</div>
+                <div><strong>✅ Matched Keywords (${candidate.matched.length}):</strong> ${candidate.matched.slice(0,15).join(', ') || 'None'}</div>
+                <div><strong>❌ Missing Keywords (${candidate.missing.length}):</strong> ${candidate.missing.slice(0,15).join(', ') || 'None'}</div>
+                <div style="margin-top:0.5rem;"><strong>📄 Resume Preview:</strong></div>
+                <div style="background:#f1f5f9; padding:0.5rem; border-radius:8px; max-height:200px; overflow-y:auto; font-size:0.75rem;">${resumeText.replace(/\n/g, '<br>')}</div>
+                <div style="margin-top:0.5rem;"><strong>⭐ Status:</strong> 
+                    <button class="btn btn-success btn-sm" onclick="updateStatus(${candidate.id}, 'shortlisted'); closeDetailModal();">Shortlist</button>
+                    <button class="btn btn-warning btn-sm" onclick="updateStatus(${candidate.id}, 'pending'); closeDetailModal();">Pending</button>
+                    <button class="btn btn-danger btn-sm" onclick="updateStatus(${candidate.id}, 'rejected'); closeDetailModal();">Reject</button>
+                </div>
+            `;
+            document.getElementById('candidateNotes').value = candidate.notes || '';
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+        
+        function saveNotes() {
+            if (currentDetailCandidate) {
+                currentDetailCandidate.notes = document.getElementById('candidateNotes').value;
+                candidateNotes[currentDetailCandidate.name] = currentDetailCandidate.notes;
+                alert('✅ Notes saved!');
+            }
+        }
+        function closeDetailModal() { document.getElementById('detailModal').style.display = 'none'; currentDetailCandidate = null; }
+        
+        let emailCandidates = [];
+        function bulkEmail() {
+            emailCandidates = [];
+            selectedCandidates.forEach(id => { const c = bulkResults.find(r => r.id == id); if(c) emailCandidates.push(c); });
+            if (!emailCandidates.length) { alert('No candidates selected!'); return; }
+            document.getElementById('emailContent').innerHTML = `<p><strong>Selected Candidates:</strong> ${emailCandidates.length}</p><p>${emailCandidates.map(c => c.name).join('<br>')}</p>`;
+            document.getElementById('emailMessage').value = `Dear Candidate,\n\nWe are pleased to inform you that you have been shortlisted for the next round.\n\nPlease confirm your availability for an interview.\n\nBest regards,\nHR Team`;
+            document.getElementById('emailModal').style.display = 'flex';
+        }
+        function sendEmails() {
+            const subject = document.getElementById('emailSubject').value;
+            const message = document.getElementById('emailMessage').value;
+            alert(`📧 Emails would be sent to ${emailCandidates.length} candidates.\n\nSubject: ${subject}\n\nMessage: ${message.substring(0,100)}...\n\n(Email sending requires SMTP configuration)`);
+            closeEmailModal(); clearSelection();
+        }
+        function closeEmailModal() { document.getElementById('emailModal').style.display = 'none'; }
+        
+        function updateFilter() {
+            document.getElementById('minScoreVal').innerHTML = document.getElementById('minScore').value + '%';
+            if(bulkResults.length) renderTable();
+        }
+        
+        function downloadCSV() {
+            let csv = "Name,Score,Matched Count,Missing Count,Status,Notes\n";
+            bulkResults.forEach(r => { csv += `"${r.name}",${r.score}%,${r.matched.length},${r.missing.length},"${r.status}","${(r.notes || '').replace(/"/g, '""')}"\n`; });
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'hr_helper_results.csv';
+            a.click();
+        }
+        
+        // Add CSV button to filter row
+        const csvBtn = document.createElement('button');
+        csvBtn.className = 'btn btn-outline btn-sm';
+        csvBtn.innerHTML = '⬇️ CSV';
+        csvBtn.onclick = downloadCSV;
+        document.querySelector('.filter-row').appendChild(csvBtn);
+    </script>
+</body>
+</html>

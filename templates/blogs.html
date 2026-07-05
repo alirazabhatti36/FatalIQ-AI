@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs - FatalIQ-AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f7fb; color: #1a1a2e; }
+        .navbar { background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; }
+        .nav-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; }
+        .nav-links a:hover { color: #667eea; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .card { background: white; border-radius: 20px; padding: 2.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { font-size: 2rem; color: #1e293b; margin-bottom: 0.5rem; }
+        .subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem; }
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .blog-card { background: #f8fafc; border-radius: 16px; padding: 1.5rem; transition: all 0.3s; border: 1px solid #e2e8f0; }
+        .blog-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .blog-card .date { font-size: 0.75rem; color: #94a3b8; }
+        .blog-card h3 { font-size: 1.1rem; color: #1e293b; margin: 0.5rem 0; }
+        .blog-card p { color: #64748b; font-size: 0.85rem; line-height: 1.5; }
+        .blog-card .tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.65rem; margin-top: 0.5rem; }
+        .read-more { color: #667eea; text-decoration: none; font-weight: 600; font-size: 0.85rem; }
+        .read-more:hover { text-decoration: underline; }
+        .footer { background: white; padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; margin-top: 2rem; }
+        @media (max-width: 768px) { .container { padding: 1rem; } .card { padding: 1.5rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">FatalIQ-AI</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/converter">Converter</a>
+                <a href="/resume-ats">Resume Builder & ATS</a>
+                <a href="/hr-helper">HR Helper</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h1>📝 Blogs & Articles</h1>
+            <p class="subtitle">Tips, guides, and insights to help you succeed</p>
+
+            <div class="blog-grid">
+                <div class="blog-card">
+                    <div class="date">📅 July 2025</div>
+                    <h3>How to Beat ATS in 2025</h3>
+                    <p>Learn the latest strategies to make your resume pass ATS filters and get noticed by recruiters.</p>
+                    <div><span class="tag">ATS</span><span class="tag" style="margin-left:0.25rem;">Resume Tips</span></div>
+                    <a href="#" class="read-more">Read More →</a>
+                </div>
+
+                <div class="blog-card">
+                    <div class="date">📅 June 2025</div>
+                    <h3>Top 10 Resume Mistakes to Avoid</h3>
+                    <p>Common resume errors that cost you interviews and how to fix them instantly.</p>
+                    <div><span class="tag">Resume</span><span class="tag" style="margin-left:0.25rem;">Career</span></div>
+                    <a href="#" class="read-more">Read More →</a>
+                </div>
+
+                <div class="blog-card">
+                    <div class="date">📅 June 2025</div>
+                    <h3>LinkedIn Optimization Guide</h3>
+                    <p>How to optimize your LinkedIn profile for maximum visibility and job opportunities.</p>
+                    <div><span class="tag">LinkedIn</span><span class="tag" style="margin-left:0.25rem;">Personal Branding</span></div>
+                    <a href="#" class="read-more">Read More →</a>
+                </div>
+
+                <div class="blog-card">
+                    <div class="date">📅 May 2025</div>
+                    <h3>Bulk Resume Screening Made Easy</h3>
+                    <p>How HR professionals can save 10+ hours a week using AI-powered screening tools.</p>
+                    <div><span class="tag">HR</span><span class="tag" style="margin-left:0.25rem;">Recruitment</span></div>
+                    <a href="#" class="read-more">Read More →</a>
+                </div>
+
+                <div class="blog-card">
+                    <div class="date">📅 May 2025</div>
+                    <h3>Why Client-Side Processing Matters</h3>
+                    <p>Understanding the privacy and security benefits of browser-based file conversion.</p>
+                    <div><span class="tag">Privacy</span><span class="tag" style="margin-left:0.25rem;">Security</span></div>
+                    <a href="#" class="read-more">Read More →</a>
+                </div>
+
+                <div class="blog-card">
+                    <div class="date">📅 April 2025</div>
+                    <h3>Free Tools vs Paid Tools</h3>
+                    <p>What you get with free vs paid tools — and why FatalIQ-AI gives you the best of both.</p>
+                    <div><span class="tag">Tools</span><span class="tag" style="margin-left:0.25rem;">Productivity</span></div>
+                    <a href="#" class="read-more">Read More →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 FatalIQ-AI — Empowering Your Productivity</p>
+    </footer>
+</body>
+</html>

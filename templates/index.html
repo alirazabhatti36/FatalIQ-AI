@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>FatalIQ-AI | Smart File Toolkit</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: #1a1a2e; display: flex; flex-direction: column; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 10px; }
+        
+        /* ===== NAVBAR ===== */
+        .navbar { background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); padding: 0.6rem 1rem; box-shadow: 0 2px 20px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        .logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; padding: 0.4rem 0.7rem; border-radius: 8px; transition: all 0.3s; font-size: 0.75rem; }
+        .nav-links a:hover { background: rgba(102,126,234,0.1); color: #667eea; }
+        
+        /* ===== HERO ===== */
+        .hero { text-align: center; padding: 2rem 1rem 1.5rem; color: white; }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.3rem; text-shadow: 0 4px 20px rgba(0,0,0,0.15); letter-spacing: -1px; }
+        .hero p { font-size: 1rem; opacity: 0.9; max-width: 500px; margin: 0 auto; }
+        .hero .sub-badge { display: inline-block; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 0.2rem 1rem; border-radius: 999px; font-size: 0.65rem; margin-bottom: 0.8rem; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* ===== SEARCH ===== */
+        .search-container { max-width: 600px; margin: 0 auto; padding: 0 1rem; position: relative; }
+        .search-box { display: flex; align-items: center; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-radius: 14px; padding: 0.3rem; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s; }
+        .search-box:focus-within { box-shadow: 0 8px 40px rgba(0,0,0,0.2); transform: translateY(-2px); }
+        .search-box .icon { padding: 0 0.6rem; font-size: 1rem; opacity: 0.5; }
+        .search-box input { flex: 1; padding: 0.6rem 0.2rem; border: none; background: transparent; font-size: 0.9rem; font-family: inherit; outline: none; color: #1e293b; min-width: 80px; }
+        .search-box input::placeholder { color: #94a3b8; font-size: 0.8rem; }
+        .search-box .clear-btn { background: none; border: none; padding: 0 0.6rem; font-size: 1rem; cursor: pointer; opacity: 0.4; display: none; }
+        .search-box .clear-btn:hover { opacity: 0.8; }
+        
+        /* ===== SEARCH RESULTS ===== */
+        .search-results { background: rgba(255,255,255,0.98); backdrop-filter: blur(16px); border-radius: 14px; margin-top: 0.6rem; padding: 0.3rem 0; max-height: 350px; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2); display: none; }
+        .search-results.show { display: block; animation: fadeDown 0.2s ease; }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .search-result-item { display: flex; align-items: center; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s; text-decoration: none; color: #1e293b; gap: 0.6rem; border-bottom: 1px solid #f1f5f9; }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover { background: #f1f5f9; }
+        .search-result-item .icon { font-size: 1.2rem; min-width: 1.8rem; text-align: center; }
+        .search-result-item .info { flex: 1; min-width: 0; }
+        .search-result-item .info .name { font-weight: 600; font-size: 0.85rem; }
+        .search-result-item .info .desc { font-size: 0.65rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-result-item .badge { font-size: 0.55rem; padding: 0.1rem 0.5rem; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-weight: 600; flex-shrink: 0; }
+        .search-empty { padding: 1.2rem; text-align: center; color: #94a3b8; font-size: 0.85rem; }
+        .search-empty .emoji { font-size: 1.5rem; display: block; margin-bottom: 0.2rem; }
+        
+        /* ===== QUICK SUGGESTIONS ===== */
+        .quick-suggestions { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; margin-top: 0.6rem; padding: 0 1rem; }
+        .quick-suggestions .chip { background: rgba(255,255,255,0.12); backdrop-filter: blur(4px); padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.6rem; color: rgba(255,255,255,0.85); cursor: pointer; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap; }
+        .quick-suggestions .chip:hover { background: rgba(255,255,255,0.22); color: white; transform: translateY(-2px); }
+        
+        /* ===== CARDS ===== */
+        .cards-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem 2rem; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+        .card { background: white; border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 280px; text-align: center; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; text-decoration: none; color: inherit; box-shadow: 0 20px 50px rgba(0,0,0,0.12); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(102,126,234,0.08), transparent); transition: left 0.6s; }
+        .card:hover::before { left: 100%; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 30px 70px rgba(0,0,0,0.18); }
+        .card-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .card p { color: #64748b; line-height: 1.5; margin-bottom: 0.8rem; font-size: 0.75rem; }
+        .badge { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-top: 0.3rem; }
+        .badge-blue { background: #ebf8ff; color: #2b6cb0; }
+        .badge-green { background: #f0fff4; color: #276749; }
+        .badge-purple { background: #faf5ff; color: #6b46c1; }
+        
+        /* ===== STATS ===== */
+        .stats { max-width: 1000px; margin: 0 auto 2rem; padding: 1.5rem; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 1.5rem; background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.06); }
+        .stat-item { text-align: center; color: white; min-width: 70px; }
+        .stat-number { font-size: 2rem; font-weight: 800; }
+        .stat-label { font-size: 0.75rem; opacity: 0.8; }
+        
+        /* ===== FOOTER ===== */
+        .footer { background: rgba(0,0,0,0.12); backdrop-filter: blur(12px); padding: 1.5rem 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .footer-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .footer-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.7rem; transition: color 0.3s; }
+        .footer-links a:hover { color: white; }
+        .footer-copy { color: rgba(255,255,255,0.5); font-size: 0.65rem; text-align: center; }
+        
+        /* ============================================================ */
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+        /* ============================================================ */
+        
+        /* TABLETS & SMALL LAPTOPS (max-width: 900px) */
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 0.9rem; max-width: 400px; }
+            .card { max-width: 260px; padding: 1.2rem; }
+            .card-icon { font-size: 2.6rem; }
+            .card h2 { font-size: 1rem; }
+            .stats { gap: 1rem; padding: 1.2rem; }
+            .stat-number { font-size: 1.7rem; }
+        }
+        
+        /* MOBILE LARGE (max-width: 768px) */
+        @media (max-width: 768px) {
+            .navbar { padding: 0.5rem 0.8rem; }
+            .logo { font-size: 1.2rem; }
+            .nav-links a { font-size: 0.65rem; padding: 0.3rem 0.5rem; }
+            
+            .hero { padding: 1.5rem 0.8rem 1rem; }
+            .hero h1 { font-size: 1.8rem; }
+            .hero p { font-size: 0.85rem; }
+            .hero .sub-badge { font-size: 0.55rem; padding: 0.15rem 0.8rem; }
+            
+            .search-box { padding: 0.2rem; border-radius: 12px; }
+            .search-box input { font-size: 0.8rem; padding: 0.4rem 0.2rem; }
+            .search-box .icon { font-size: 0.8rem; padding: 0 0.4rem; }
+            .search-box .clear-btn { font-size: 0.8rem; padding: 0 0.4rem; }
+            
+            .quick-suggestions .chip { font-size: 0.55rem; padding: 0.15rem 0.6rem; }
+            
+            .cards-container { padding: 1rem 0.8rem; gap: 1rem; }
+            .card { max-width: 100%; padding: 1.2rem; }
+            .card-icon { font-size: 2.4rem; }
+            .card p { font-size: 0.7rem; }
+            
+            .stats { gap: 0.8rem; padding: 1rem; border-radius: 18px; }
+            .stat-number { font-size: 1.4rem; }
+            .stat-label { font-size: 0.65rem; }
+            
+            .footer { padding: 1rem 0.8rem; }
+            .footer-links { gap: 0.6rem; }
+            .footer-links a { font-size: 0.6rem; }
+            .footer-copy { font-size: 0.55rem; }
+        }
+        
+        /* MOBILE SMALL (max-width: 480px) */
+        @media (max-width: 480px) {
+            .nav-container { flex-direction: column; gap: 0.3rem; }
+            .nav-links { justify-content: center; }
+            .nav-links a { font-size: 0.6rem; padding: 0.2rem 0.4rem; }
+            
+            .hero h1 { font-size: 1.5rem; }
+            .hero p { font-size: 0.75rem; }
+            
+            .search-box input { font-size: 0.7rem; }
+            .search-box input::placeholder { font-size: 0.65rem; }
+            
+            .quick-suggestions .chip { font-size: 0.5rem; padding: 0.1rem 0.5rem; }
+            
+            .card { padding: 1rem; }
+            .card-icon { font-size: 2rem; }
+            .card h2 { font-size: 0.9rem; }
+            .card p { font-size: 0.65rem; }
+            .badge { font-size: 0.5rem; padding: 0.15rem 0.6rem; }
+            
+            .stats { padding: 0.8rem; gap: 0.6rem; }
+            .stat-number { font-size: 1.2rem; }
+            .stat-label { font-size: 0.55rem; }
+            
+            .search-result-item { padding: 0.4rem 0.6rem; }
+            .search-result-item .info .name { font-size: 0.75rem; }
+            .search-result-item .info .desc { font-size: 0.55rem; }
+            .search-result-item .icon { font-size: 1rem; min-width: 1.5rem; }
+            .search-result-item .badge { font-size: 0.5rem; padding: 0.05rem 0.4rem; }
+            
+            .footer-links { gap: 0.4rem; }
+            .footer-links a { font-size: 0.55rem; }
+            .footer-copy { font-size: 0.5rem; }
+        }
+        
+        /* EXTRA SMALL (max-width: 360px) */
+        @media (max-width: 360px) {
+            .hero h1 { font-size: 1.3rem; }
+            .logo { font-size: 1rem; }
+            .nav-links a { font-size: 0.55rem; padding: 0.15rem 0.35rem; }
+            .card { padding: 0.8rem; }
+            .card-icon { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">FatalIQ-AI</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/converter">Converter</a>
+                <a href="/resume-ats">Resume Builder &amp; ATS</a>
+                <a href="/hr-helper">HR Helper</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <div class="hero">
+        <div class="sub-badge">🚀 AI-Powered Toolkit</div>
+        <h1>🎯 FatalIQ-AI</h1>
+        <p>Your All-in-One Smart Toolkit — Convert, Build, Screen, Optimize</p>
+    </div>
+
+    <!-- ===== SMART SEARCH ===== -->
+    <div class="search-container">
+        <div class="search-box">
+            <span class="icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search tools..." autocomplete="off">
+            <button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- Quick Suggestions -->
+    <div class="quick-suggestions" id="quickSuggestions">
+        <span class="chip" onclick="searchQuick('pdf to image')">🖼️ PDF→Image</span>
+        <span class="chip" onclick="searchQuick('merge pdf')">➕ Merge</span>
+        <span class="chip" onclick="searchQuick('compress pdf')">🗜️ Compress</span>
+        <span class="chip" onclick="searchQuick('word to pdf')">📝 Word→PDF</span>
+        <span class="chip" onclick="searchQuick('ocr')">📄 OCR</span>
+        <span class="chip" onclick="searchQuick('resume')">📄 Resume</span>
+    </div>
+
+    <!-- ===== TOOLS DATABASE ===== -->
+    <script>
+        const toolsDatabase = [
+            // Office Converters
+            { name: "Word to PDF", icon: "📝→📕", url: "/converter", category: "Office", keywords: ["word", "docx", "pdf", "convert", "document"] },
+            { name: "PDF to Word", icon: "📕→📝", url: "/converter", category: "Office", keywords: ["pdf", "word", "docx", "convert", "document"] },
+            { name: "PPT to PDF", icon: "📊→📕", url: "/converter", category: "Office", keywords: ["ppt", "powerpoint", "pdf", "convert", "presentation"] },
+            { name: "Excel to PDF", icon: "📗→📕", url: "/converter", category: "Office", keywords: ["excel", "xlsx", "pdf", "convert", "spreadsheet"] },
+            { name: "RTF to DOCX", icon: "📄→📝", url: "/converter", category: "Office", keywords: ["rtf", "docx", "word", "convert"] },
+            { name: "TXT to PDF", icon: "📄→📕", url: "/converter", category: "Office", keywords: ["txt", "text", "pdf", "convert"] },
+            
+            // PDF Tools
+            { name: "Merge PDF", icon: "➕", url: "/converter", category: "PDF", keywords: ["merge", "combine", "join", "pdf", "multiple files"] },
+            { name: "Split PDF", icon: "✂️", url: "/converter", category: "PDF", keywords: ["split", "divide", "separate", "pdf", "pages"] },
+            { name: "Compress PDF", icon: "🗜️", url: "/converter", category: "PDF", keywords: ["compress", "reduce", "size", "pdf", "smaller"] },
+            { name: "Rotate PDF", icon: "🔄", url: "/converter", category: "PDF", keywords: ["rotate", "turn", "pdf", "pages", "orientation"] },
+            { name: "Lock PDF", icon: "🔒", url: "/converter", category: "PDF", keywords: ["lock", "password", "protect", "secure", "pdf"] },
+            { name: "Unlock PDF", icon: "🔓", url: "/converter", category: "PDF", keywords: ["unlock", "remove password", "pdf", "decrypt"] },
+            { name: "Add Watermark", icon: "💧", url: "/converter", category: "PDF", keywords: ["watermark", "text", "overlay", "pdf", "protect"] },
+            { name: "Delete Pages", icon: "🗑️", url: "/converter", category: "PDF", keywords: ["delete", "remove", "pages", "pdf", "extract"] },
+            { name: "Extract Pages", icon: "📤", url: "/converter", category: "PDF", keywords: ["extract", "save", "pages", "pdf", "separate"] },
+            { name: "Add Page Numbers", icon: "🔢", url: "/converter", category: "PDF", keywords: ["page numbers", "numbering", "pdf", "footer"] },
+            { name: "PDF to Image", icon: "🖼️", url: "/converter", category: "PDF", keywords: ["pdf", "image", "png", "jpg", "convert"] },
+            { name: "PDF to TXT", icon: "📄", url: "/converter", category: "PDF", keywords: ["pdf", "text", "extract", "txt", "convert"] },
+            
+            // Image Tools
+            { name: "Image to PDF", icon: "🖼️→📕", url: "/converter", category: "Image", keywords: ["image", "pdf", "png", "jpg", "convert"] },
+            { name: "Image to Word (OCR)", icon: "🖼️→📝", url: "/converter", category: "Image", keywords: ["image", "word", "ocr", "extract", "text"] },
+            { name: "Image to Excel (OCR)", icon: "🖼️→📊", url: "/converter", category: "Image", keywords: ["image", "excel", "ocr", "extract", "data"] },
+            { name: "OCR to Text", icon: "📄", url: "/converter", category: "Image", keywords: ["ocr", "image", "text", "extract", "scan"] },
+            { name: "JPG to PNG", icon: "JPG→PNG", url: "/converter", category: "Image", keywords: ["jpg", "png", "convert", "image"] },
+            { name: "PNG to JPG", icon: "PNG→JPG", url: "/converter", category: "Image", keywords: ["png", "jpg", "convert", "image"] },
+            { name: "WEBP to PNG", icon: "WEBP→PNG", url: "/converter", category: "Image", keywords: ["webp", "png", "convert", "image"] },
+            { name: "SVG to PNG", icon: "SVG→PNG", url: "/converter", category: "Image", keywords: ["svg", "png", "convert", "vector", "image"] },
+            { name: "Compress Image", icon: "🗜️", url: "/converter", category: "Image", keywords: ["compress", "reduce", "size", "image", "quality"] },
+            
+            // Resume Builder & ATS
+            { name: "Resume Builder", icon: "📄", url: "/resume-ats", category: "Resume", keywords: ["resume", "cv", "build", "create", "professional"] },
+            { name: "ATS Scanner", icon: "🎯", url: "/resume-ats", category: "Resume", keywords: ["ats", "scan", "score", "resume", "job description"] },
+            { name: "Cover Letter Generator", icon: "📝", url: "/resume-ats", category: "Resume", keywords: ["cover letter", "generate", "write", "application"] },
+            
+            // HR Helper
+            { name: "Bulk Resume Screening", icon: "👥", url: "/hr-helper", category: "HR", keywords: ["hr", "bulk", "screening", "resume", "recruitment"] },
+            { name: "Candidate Shortlisting", icon: "⭐", url: "/hr-helper", category: "HR", keywords: ["shortlist", "candidate", "hr", "recruitment"] },
+            { name: "Bulk Email", icon: "📧", url: "/hr-helper", category: "HR", keywords: ["email", "bulk", "candidate", "hr", "communication"] },
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const clearBtn = document.getElementById('clearBtn');
+
+        function performSearch(query) {
+            const trimmed = query.trim().toLowerCase();
+            
+            if (trimmed === '') {
+                searchResults.classList.remove('show');
+                clearBtn.style.display = 'none';
+                return;
+            }
+
+            clearBtn.style.display = 'block';
+
+            const results = toolsDatabase.filter(tool => {
+                const searchStr = tool.name.toLowerCase() + ' ' + tool.category.toLowerCase() + ' ' + tool.keywords.join(' ');
+                return searchStr.includes(trimmed);
+            });
+
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-empty">
+                        <span class="emoji">🔍</span>
+                        No tools found for "<strong>${query}</strong>"
+                    </div>
+                `;
+            } else {
+                searchResults.innerHTML = results.map(tool => `
+                    <a href="${tool.url}" class="search-result-item">
+                        <span class="icon">${tool.icon}</span>
+                        <div class="info">
+                            <div class="name">${tool.name}</div>
+                            <div class="desc">${tool.category}</div>
+                        </div>
+                        <span class="badge">${tool.category}</span>
+                    </a>
+                `).join('');
+            }
+
+            searchResults.classList.add('show');
+        }
+
+        searchInput.addEventListener('input', function(e) {
+            performSearch(e.target.value);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                searchResults.classList.remove('show');
+            }
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            searchResults.classList.remove('show');
+            clearBtn.style.display = 'none';
+            searchInput.focus();
+        }
+
+        function searchQuick(query) {
+            searchInput.value = query;
+            performSearch(query);
+            searchInput.focus();
+        }
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+    </script>
+
+    <!-- ===== CARDS ===== -->
+    <div class="cards-container">
+        <a href="/converter" class="card">
+            <div class="card-icon">🔄</div>
+            <h2>File Converter</h2>
+            <p>Convert PDF, Word, Excel, PPT, Images — 30+ formats</p>
+            <span class="badge badge-blue">30+ Tools</span>
+        </a>
+
+        <a href="/resume-ats" class="card">
+            <div class="card-icon">📄🎯</div>
+            <h2>Resume Builder &amp; ATS</h2>
+            <p>Build resumes + Real-time ATS score &amp; suggestions</p>
+            <span class="badge badge-green">AI Powered</span>
+        </a>
+
+        <a href="/hr-helper" class="card">
+            <div class="card-icon">👥</div>
+            <h2>HR Helper</h2>
+            <p>Bulk resume screening against job description (300+ resumes)</p>
+            <span class="badge badge-purple">Bulk Screening</span>
+        </a>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-number">30+</div>
+            <div class="stat-label">File Tools</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Free</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">Bulk</div>
+            <div class="stat-label">300 Resumes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">Instant</div>
+            <div class="stat-label">Processing</div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/terms">Terms &amp; Conditions</a>
+                <a href="/contact">Contact Us</a>
+                <a href="/about">About Us</a>
+                <a href="/blogs">Blogs</a>
+            </div>
+            <div class="footer-copy">
+                &copy; 2025 FatalIQ-AI — Empowering Your Productivity
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
