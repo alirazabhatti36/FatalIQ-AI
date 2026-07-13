@@ -53,6 +53,23 @@
         .page-header { text-align: center; margin-bottom: 2rem; padding: 1rem; }
         .page-header h1 { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; }
         .page-header p { color: #64748b; font-size: 1rem; margin-top: 0.25rem; }
+
+        .hero-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+        .hero-pill {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.08));
+            border: 1px solid rgba(102,126,234,0.16);
+            border-radius: 16px;
+            padding: 0.95rem 1rem;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.06);
+        }
+        .hero-pill .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; }
+        .hero-pill .value { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-top: 0.2rem; }
+        .hero-pill .sub { font-size: 0.75rem; color: #64748b; margin-top: 0.15rem; }
         
         /* Cards */
         .card { background: white; border-radius: 20px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 1.5rem; border: 1px solid rgba(226,232,240,0.5); transition: all 0.3s; }
@@ -64,6 +81,32 @@
         .upload-zone .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
         .upload-zone p { font-size: 0.95rem; color: #475569; }
         .upload-zone small { font-size: 0.75rem; color: #94a3b8; }
+
+        .field-label {
+            margin-top: 0.95rem;
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 0.7rem 0.85rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: #fafbff;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            background: white;
+        }
         
         textarea { width: 100%; min-height: 100px; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 0.875rem; font-family: inherit; resize: vertical; transition: all 0.3s; background: #fafbff; }
         textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); background: white; }
@@ -148,6 +191,7 @@
         
         @media (max-width: 900px) {
             .chart-container { flex-direction: column; }
+            .hero-strip { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
@@ -209,7 +253,25 @@
     <div class="container">
         <div class="page-header">
             <h1>👥 HR Helper</h1>
-            <p>Upload resumes, screen against job description, shortlist candidates instantly</p>
+            <p>Choose a role, paste the job description, and screen resumes by keyword match instantly</p>
+        </div>
+
+        <div class="hero-strip">
+            <div class="hero-pill">
+                <div class="label">Scoring Mode</div>
+                <div class="value">Description-only ATS</div>
+                <div class="sub">Job title is for role context only</div>
+            </div>
+            <div class="hero-pill">
+                <div class="label">Privacy</div>
+                <div class="value">Files stay in workflow</div>
+                <div class="sub">Resume text is extracted, then matched</div>
+            </div>
+            <div class="hero-pill">
+                <div class="label">Signal Quality</div>
+                <div class="value">Stop words removed</div>
+                <div class="sub">The, they, is, we and similar filler are ignored</div>
+            </div>
         </div>
 
         <div class="card">
@@ -221,14 +283,36 @@
             </div>
             <div id="fileCount"></div>
 
-            <label style="margin-top:1rem; display:block; font-weight:600; font-size:0.85rem; color:#475569;">📝 Job Description</label>
-            <textarea id="jobDesc" placeholder="Paste job description here..."></textarea>
+            <label class="field-label" for="jobTitle">💼 Job Title</label>
+            <select id="jobTitle" class="select-field" onchange="updateRolePreview()">
+                <option value="">Select job title</option>
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Frontend Developer">Frontend Developer</option>
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="Full Stack Developer">Full Stack Developer</option>
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="Product Manager">Product Manager</option>
+                <option value="UI/UX Designer">UI/UX Designer</option>
+                <option value="Digital Marketer">Digital Marketer</option>
+                <option value="HR Manager">HR Manager</option>
+                <option value="Sales Executive">Sales Executive</option>
+                <option value="Other">Other / Custom</option>
+            </select>
+            <input type="text" id="customJobTitle" class="select-field" placeholder="Type custom job title" style="display:none; margin-top:0.5rem;">
+
+            <label class="field-label" for="jobDesc">📝 Job Description</label>
+            <textarea id="jobDesc" placeholder="Paste job description here..." oninput="updateRolePreview()"></textarea>
 
             <div class="filter-row">
                 <label>🎯 Min Score: <input type="range" id="minScore" min="0" max="90" value="20" step="1" oninput="updateFilter()"> <span id="minScoreVal" style="font-weight:700; color:#667eea;">20%</span></label>
                 <label>📊 Status: <select id="statusFilter" onchange="renderTable()"><option value="all">All</option><option value="shortlisted">⭐ Shortlisted</option><option value="rejected">❌ Rejected</option><option value="pending">⏳ Pending</option></select></label>
                 <label>🔽 Sort: <select id="sortOrder" onchange="renderTable()"><option value="desc">Highest First</option><option value="asc">Lowest First</option></select></label>
                 <button class="btn btn-primary btn-glow" id="scanBtn" onclick="startBulkScan()">🚀 Start Screening</button>
+            </div>
+
+            <div style="margin-top:0.85rem; padding:0.85rem 1rem; border-radius:14px; background:linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); border:1px solid rgba(102,126,234,0.12); color:#475569; font-size:0.85rem; line-height:1.55;">
+                <strong style="color:#1e293b;">Current focus:</strong>
+                <span id="rolePreview">Select a job title and paste a description to start screening.</span>
             </div>
 
             <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
@@ -346,6 +430,56 @@
         let candidateStatus = {};
         let candidateNotes = {};
         let selectedCandidates = new Set();
+
+        const stopWords = new Set([
+            'the','and','for','are','with','this','that','you','your','have','from','will','can','was','they','their','been','has','but','not','all','our','its','also','more','when','which','a','an','in','of','to','is','on','at','we','us','he','she','it','them','his','her','them','these','those','as','by','be','been','being','or','if','into','than','then','there','here','over','under','up','down','out','per','via','into','about','after','before','during','between','within','without','one','two','three','four','five','six','seven','eight','nine','ten'
+        ]);
+
+        function getSelectedJobTitle() {
+            const selected = document.getElementById('jobTitle').value.trim();
+            if (selected === 'Other') {
+                return document.getElementById('customJobTitle').value.trim() || 'Custom Role';
+            }
+            return selected || 'Select a job title';
+        }
+
+        function updateRolePreview() {
+            const title = getSelectedJobTitle();
+            const desc = document.getElementById('jobDesc').value.trim();
+            const count = extractKeywords(desc).length;
+            const suffix = desc ? ` • ${count} target keywords` : '';
+            document.getElementById('rolePreview').textContent = `${title}${suffix}`;
+        }
+
+        function toggleCustomTitleField() {
+            const titleField = document.getElementById('jobTitle');
+            const customField = document.getElementById('customJobTitle');
+            const isCustom = titleField.value === 'Other';
+            customField.style.display = isCustom ? 'block' : 'none';
+            if (!isCustom) customField.value = '';
+            updateRolePreview();
+        }
+
+        function extractKeywords(text) {
+            return Array.from(new Set(
+                (text || '')
+                    .toLowerCase()
+                    .match(/[a-z0-9+.#-]{2,}/g) || []
+            )).filter(word => word.length > 2 && !stopWords.has(word));
+        }
+
+        function analyzeResumeAgainstDescription(resumeText, jobDesc) {
+            const resumeWords = new Set((resumeText || '').toLowerCase().match(/[a-z0-9+.#-]{2,}/g) || []);
+            const keywords = extractKeywords(jobDesc);
+            const matched = keywords.filter(word => resumeWords.has(word));
+            const missing = keywords.filter(word => !resumeWords.has(word));
+            const score = keywords.length ? Math.round((matched.length / keywords.length) * 100) : 0;
+            return { score, matched, missing };
+        }
+
+        document.getElementById('jobTitle').addEventListener('change', toggleCustomTitleField);
+        document.getElementById('customJobTitle').addEventListener('input', updateRolePreview);
+        updateRolePreview();
         
         function handleFiles(files) {
             selectedFiles = Array.from(files).filter(f => f.name.match(/\.(pdf|docx)$/i)).slice(0, 300);
@@ -354,6 +488,7 @@
         
         async function startBulkScan() {
             if (!selectedFiles.length) { alert('Please select resumes first!'); return; }
+            const jobTitle = getSelectedJobTitle();
             const jobDesc = document.getElementById('jobDesc').value.trim();
             if (!jobDesc) { alert('Please paste job description!'); return; }
 
@@ -374,19 +509,19 @@
                 document.getElementById('processingInfo').innerHTML = `Processing ${i+1} of ${selectedFiles.length}: ${file.name}`;
                 document.getElementById('progressFill').style.width = `${((i+1)/selectedFiles.length)*100}%`;
 
-                const formData = new FormData();
-                formData.append('resume', file);
-                formData.append('job_desc', jobDesc);
-
                 try {
-                    const res = await fetch('/ats-score', { method: 'POST', body: formData });
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch('/upload-linkedin-file', { method: 'POST', body: formData });
                     const data = await res.json();
+                    const analysis = analyzeResumeAgainstDescription(data.text || '', jobDesc);
                     bulkResults.push({
                         id: i,
                         name: data.filename || file.name,
-                        score: data.score || 0,
-                        matched: data.matched || [],
-                        missing: data.missing || [],
+                        title: jobTitle,
+                        score: analysis.score,
+                        matched: analysis.matched,
+                        missing: analysis.missing,
                         status: candidateStatus[file.name] || 'pending',
                         notes: candidateNotes[file.name] || '',
                         file: file
@@ -395,6 +530,7 @@
                     bulkResults.push({
                         id: i,
                         name: file.name,
+                        title: jobTitle,
                         score: 0,
                         matched: [],
                         missing: [],
@@ -422,9 +558,10 @@
             const pending = total - shortlisted - rejected;
             const avgScore = Math.round(bulkResults.reduce((s,r)=>s+r.score,0)/total);
             const topScore = Math.max(...bulkResults.map(r=>r.score));
+            const roleName = getSelectedJobTitle();
             
             document.getElementById('statsRow').innerHTML = `
-                <div class="stat-box" onclick="filterByStatus('all')"><div class="num">${total}</div><div class="lbl">Total</div></div>
+                <div class="stat-box" onclick="filterByStatus('all')"><div class="num">${total}</div><div class="lbl">${roleName}</div></div>
                 <div class="stat-box" onclick="filterByStatus('shortlisted')"><div class="num" style="color:#10b981;">${shortlisted}</div><div class="lbl">⭐ Shortlisted</div></div>
                 <div class="stat-box" onclick="filterByStatus('rejected')"><div class="num" style="color:#ef4444;">${rejected}</div><div class="lbl">❌ Rejected</div></div>
                 <div class="stat-box" onclick="filterByStatus('pending')"><div class="num" style="color:#f59e0b;">${pending}</div><div class="lbl">⏳ Pending</div></div>
@@ -479,7 +616,7 @@
                     <tr>
                         <td><input type="checkbox" class="checkbox" data-id="${r.id}" ${isChecked ? 'checked' : ''} onchange="toggleCandidate(${r.id})"></td>
                         <td>${idx+1}</td>
-                        <td style="cursor:pointer; color:#667eea; font-weight:500;" onclick="showCandidateDetail(${r.id})">📄 ${r.name}</td>
+                        <td style="cursor:pointer; color:#667eea; font-weight:500;" onclick="showCandidateDetail(${r.id})">📄 ${r.name}<div style="font-size:0.7rem; color:#94a3b8; margin-top:0.15rem;">${r.title || getSelectedJobTitle()}</div></td>
                         <td><span class="score-badge ${scoreClass}">${r.score}%</span></td>
                         <td>${r.matched.length}</td>
                         <td>${r.missing.length}</td>
@@ -547,6 +684,7 @@
             
             document.getElementById('detailContent').innerHTML = `
                 <div><strong>📄 File:</strong> ${candidate.name}</div>
+                <div><strong>💼 Job Title:</strong> ${candidate.title || getSelectedJobTitle()}</div>
                 <div><strong>🎯 Score:</strong> ${candidate.score}%</div>
                 <div><strong>✅ Matched Keywords (${candidate.matched.length}):</strong> ${candidate.matched.slice(0,15).join(', ') || 'None'}</div>
                 <div><strong>❌ Missing Keywords (${candidate.missing.length}):</strong> ${candidate.missing.slice(0,15).join(', ') || 'None'}</div>

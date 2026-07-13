@@ -734,30 +734,6 @@ def compress_image():
     img.save(out,'JPEG', quality=quality)
     return send_file(out, as_attachment=True, download_name='compressed.jpg')
 
-# ─────────────────────────────────────────
-#  ATS (for HR Helper)
-# ─────────────────────────────────────────
-@app.route('/ats-score', methods=['POST'])
-def ats_score():
-    resume_file = request.files['resume']
-    job_desc    = request.form.get('job_desc', '')
-    filename    = resume_file.filename
-    ext         = filename.rsplit('.',1)[-1]
-    p           = save(resume_file, filename)
-    resume_text = extract_text_from_pdf(p) if ext=='pdf' else extract_text_from_docx(p)
-    resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
-    job_words    = set(re.findall(r'\b\w+\b', job_desc.lower()))
-    stop = {'the','and','for','are','with','this','that','you','your','have','from',
-            'will','can','was','they','their','been','has','but','not','all','our',
-            'its','also','more','when','which','a','an','in','of','to','is','on','at'}
-    job_keywords = job_words - stop
-    if not job_keywords:
-        return jsonify({'score':0,'matched':[],'missing':[],'filename':filename})
-    matched = sorted(job_keywords & resume_words)
-    missing = sorted(job_keywords - resume_words)
-    score   = round(len(matched)/len(job_keywords)*100)
-    return jsonify({'score':score,'matched':matched,'missing':missing,'filename':filename})
-
 @app.route('/download-resume/<filename>')
 def download_resume(filename):
     path = os.path.join(UPLOAD, filename)
