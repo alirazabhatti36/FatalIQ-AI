@@ -371,6 +371,7 @@
         let currentField = '';
         let currentTemplate = 'modern';
         let selectedFile = null;
+        const ATS_BACKEND_BASE = 'https://auratoolkit-360.onrender.com';
 
         const atsStopWords = new Set([
             'the','and','for','are','with','this','that','you','your','have','from','will','can','was','they','their','been','has','but','not','all','our','its','also','more','when','which','a','an','in','of','to','is','on','at','we','us','he','she','it','them','his','her','these','those','as','by','be','being','or','if','into','than','then','there','here','over','under','up','down','out','per','via','about','after','before','during','between','within','without'
@@ -432,7 +433,7 @@
             formData.append('file', selectedFile);
             
             try {
-                const res = await fetch('/upload-linkedin-file', { method: 'POST', body: formData });
+                const res = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (data.text) {
@@ -528,7 +529,7 @@
             formData.append('job_desc', jobDesc);
             
             try {
-                const res = await fetch('/ats-score', { method: 'POST', body: formData });
+                const res = await fetch(`${ATS_BACKEND_BASE}/ats-score`, { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (data) {

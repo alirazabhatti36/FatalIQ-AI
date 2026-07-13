@@ -430,6 +430,7 @@
         let candidateStatus = {};
         let candidateNotes = {};
         let selectedCandidates = new Set();
+        const ATS_BACKEND_BASE = 'https://auratoolkit-360.onrender.com';
 
         const stopWords = new Set([
             'the','and','for','are','with','this','that','you','your','have','from','will','can','was','they','their','been','has','but','not','all','our','its','also','more','when','which','a','an','in','of','to','is','on','at','we','us','he','she','it','them','his','her','them','these','those','as','by','be','been','being','or','if','into','than','then','there','here','over','under','up','down','out','per','via','into','about','after','before','during','between','within','without','one','two','three','four','five','six','seven','eight','nine','ten'
@@ -512,7 +513,7 @@
                 try {
                     const formData = new FormData();
                     formData.append('file', file);
-                    const res = await fetch('/upload-linkedin-file', { method: 'POST', body: formData });
+                    const res = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
                     const data = await res.json();
                     const analysis = analyzeResumeAgainstDescription(data.text || '', jobDesc);
                     bulkResults.push({
@@ -677,7 +678,7 @@
             try {
                 const formData = new FormData();
                 formData.append('file', candidate.file);
-                const res = await fetch('/upload-linkedin-file', { method: 'POST', body: formData });
+                const res = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.text) resumeText = data.text.substring(0, 1000);
             } catch(e) {}

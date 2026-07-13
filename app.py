@@ -49,6 +49,16 @@ app.url_map.strict_slashes = False
 UPLOAD = 'uploads'
 os.makedirs(UPLOAD, exist_ok=True)
 
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get('Origin')
+    if origin in {'https://auratoolkit360.com', 'https://www.auratoolkit360.com'}:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        response.headers['Vary'] = 'Origin'
+    return response
+
 PAGE_TEMPLATES = {
     'index': 'index.html',
     'converter': 'converter.html',
