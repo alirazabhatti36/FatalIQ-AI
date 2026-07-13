@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraToolkit360</title>
+    <script>
+        (function () {
+            const routes = {
+                'converter': '/templates/converter.html',
+                'resume-ats': '/templates/resume-ats.html',
+                'hr-helper': '/templates/hr-helper.html',
+                'privacy-policy': '/templates/privacy-policy.html',
+                'terms': '/templates/terms.html',
+                'contact': '/templates/contact.html',
+                'about': '/templates/about.html',
+                'blogs': '/templates/blogs.html'
+            };
+
+            const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+            const target = routes[path] || '/templates/index.html';
+            window.location.replace(target);
+        }());
+    </script>
+    <noscript>
+        <meta http-equiv="refresh" content="0; url=/templates/index.html">
+    </noscript>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>
