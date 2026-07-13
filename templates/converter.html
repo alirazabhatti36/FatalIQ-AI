@@ -159,6 +159,18 @@
                     <button class="btn btn-primary">Convert & Download</button>
                 </form>
             </div>
+            <div class="tool-card"><div class="tool-icon">📝→📄</div><h3>DOCX to TXT</h3>
+                <form action="/docx-to-txt" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".docx" required>
+                    <button class="btn btn-primary">Convert & Download</button>
+                </form>
+            </div>
+            <div class="tool-card"><div class="tool-icon">📗→📄</div><h3>Excel to CSV</h3>
+                <form action="/excel-to-csv" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".xlsx,.xls" required>
+                    <button class="btn btn-primary">Convert & Download</button>
+                </form>
+            </div>
         </div>
 
         <!-- PDF Tools -->

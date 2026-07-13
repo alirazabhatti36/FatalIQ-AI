@@ -365,6 +365,29 @@ def rtf_to_docx():
     except Exception as e:
         return jsonify({'error': f'RTF to DOCX failed: {str(e)}'}), 500
 
+@app.route('/docx-to-txt', methods=['POST'])
+def docx_to_txt():
+    try:
+        p = save(request.files['file'], 'input.docx')
+        text = extract_text_from_docx(p)
+        out = os.path.join(UPLOAD, 'output.txt')
+        with open(out, 'w', encoding='utf-8') as f:
+            f.write(text)
+        return send_file(out, as_attachment=True, download_name='converted.txt', mimetype='text/plain')
+    except Exception as e:
+        return jsonify({'error': f'DOCX to TXT failed: {str(e)}'}), 500
+
+@app.route('/excel-to-csv', methods=['POST'])
+def excel_to_csv():
+    try:
+        p = save(request.files['file'], 'input.xlsx')
+        df = pd.read_excel(p)
+        out = os.path.join(UPLOAD, 'output.csv')
+        df.to_csv(out, index=False, encoding='utf-8-sig')
+        return send_file(out, as_attachment=True, download_name='converted.csv', mimetype='text/csv')
+    except Exception as e:
+        return jsonify({'error': f'Excel to CSV failed: {str(e)}'}), 500
+
 # ─────────────────────────────────────────
 #  PDF TOOLS
 # ─────────────────────────────────────────
