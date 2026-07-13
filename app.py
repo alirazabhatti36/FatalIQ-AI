@@ -1,6 +1,4 @@
 from flask import Flask, request, send_file, send_from_directory, render_template, jsonify, redirect, abort
-from docx2pdf import convert as docx_to_pdf
-from pdf2docx import Converter as PDFToWordConverter
 from reportlab.lib.pagesizes import A4, letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Image as RLImage
@@ -8,11 +6,25 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from PIL import Image
 import pytesseract
-import pandas as pd
 import PyPDF2
 import docx
 import os, re, io, zipfile, shutil
 import json
+
+try:
+    from docx2pdf import convert as docx_to_pdf
+except ImportError:
+    docx_to_pdf = None
+
+try:
+    from pdf2docx import Converter as PDFToWordConverter
+except ImportError:
+    PDFToWordConverter = None
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
 
 # Try to import optional dependencies for Render compatibility
 try:
@@ -310,6 +322,8 @@ def export_resume_docx():
 @app.route('/word-to-pdf', methods=['POST'])
 def word_to_pdf():
     try:
+        if docx_to_pdf is None:
+            return jsonify({'error': 'Word to PDF dependency is not available on this server.'}), 503
         p = save(request.files['file'], 'input.docx')
         docx_to_pdf(p, os.path.join(UPLOAD,'output.pdf'))
         return send_file(os.path.join(UPLOAD,'output.pdf'), as_attachment=True, download_name='converted.pdf')
@@ -319,6 +333,8 @@ def word_to_pdf():
 @app.route('/pdf-to-word', methods=['POST'])
 def pdf_to_word():
     try:
+        if PDFToWordConverter is None:
+            return jsonify({'error': 'PDF to Word dependency is not available on this server.'}), 503
         p = save(request.files['file'], 'input.pdf')
         cv = PDFToWordConverter(p)
         out = os.path.join(UPLOAD,'output.docx')
@@ -384,6 +400,8 @@ def docx_to_txt():
 @app.route('/excel-to-csv', methods=['POST'])
 def excel_to_csv():
     try:
+        if pd is None:
+            return jsonify({'error': 'Excel to CSV dependency is not available on this server.'}), 503
         p = save(request.files['file'], 'input.xlsx')
         df = pd.read_excel(p)
         out = os.path.join(UPLOAD, 'output.csv')
