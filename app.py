@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template, jsonify, redirect
+from flask import Flask, request, send_file, send_from_directory, render_template, jsonify, redirect
 from docx2pdf import convert as docx_to_pdf
 from pdf2docx import Converter as PDFToWordConverter
 from reportlab.lib.pagesizes import A4, letter
@@ -94,6 +94,14 @@ def about():
 @app.route('/blogs')
 def blogs():
     return render_template('blogs.html')
+
+@app.route('/favicon.svg')
+def favicon_svg():
+    return send_from_directory(app.root_path, 'favicon.svg', mimetype='image/svg+xml')
+
+@app.route('/favicon.ico')
+def favicon_ico():
+    return send_from_directory(app.root_path, 'favicon.svg', mimetype='image/svg+xml')
 
 # ─────────────────────────────────────────
 #  OLD ROUTES REDIRECT

@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraToolkit360 | File Converter</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; }
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; line-height: 1.5; overflow-x: hidden; }
         
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -59,12 +61,35 @@
         .stat-number { font-size: 1.8rem; font-weight: 800; color: #667eea; }
         .stat-label { font-size: 0.75rem; color: #64748b; font-weight: 500; }
         
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+        }
+
         @media (max-width: 768px) {
+            .navbar { padding: 0.7rem 1rem; }
+            .nav-container { flex-direction: column; align-items: stretch; }
+            .logo { font-size: 1.3rem; text-align: center; }
+            .nav-links { justify-content: center; }
             .container { padding: 1rem; }
+            .page-header h1 { font-size: 1.6rem; }
+            .page-header p { font-size: 0.9rem; }
+            .section-title { font-size: 1.05rem; margin: 1.5rem 0 1rem; }
             .grid { grid-template-columns: 1fr; }
-            .stats-banner { gap: 1.5rem; padding: 1rem; }
+            .tool-card { padding: 1.1rem; }
+            .stats-banner { gap: 1rem; padding: 1rem; flex-direction: column; }
+            .stat-item { width: 100%; }
             .stat-number { font-size: 1.4rem; }
             .nav-links a { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+            .btn { width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links a { font-size: 0.7rem; padding: 0.25rem 0.45rem; }
+            .page-header { margin-bottom: 1rem; }
+            .page-header h1 { font-size: 1.35rem; }
+            .tool-card h3 { font-size: 0.9rem; }
+            input[type="file"], select { font-size: 0.7rem; padding: 0.5rem 0.6rem; }
+            .tool-icon { font-size: 1.8rem; }
         }
     </style>
 </head>

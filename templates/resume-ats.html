@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraToolkit360 | Ultimate Resume Builder & ATS</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; }
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; line-height: 1.5; overflow-x: hidden; }
         
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -102,7 +104,40 @@
         
         #grammarSuggestions { margin-top:1rem; background:#f1f5f9; border-radius:12px; padding:0.75rem; display:none; border-left:4px solid #f59e0b; }
         
-        @media (max-width: 900px) { .builder-layout { grid-template-columns: 1fr; } .preview-panel { position: static; height: auto; } .form-panel { height: auto; } }
+        @media (max-width: 900px) {
+            .builder-layout { grid-template-columns: 1fr; }
+            .preview-panel { position: static; height: auto; }
+            .form-panel { height: auto; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0.7rem 1rem; }
+            .nav-container { flex-direction: column; align-items: stretch; }
+            .logo { font-size: 1.3rem; text-align: center; }
+            .nav-links { justify-content: center; }
+            .container { padding: 1rem; }
+            .builder-layout { gap: 1rem; }
+            .form-panel, .preview-panel { padding: 1rem; border-radius: 16px; }
+            .page-header h1 { font-size: 1.6rem; }
+            .page-header p { font-size: 0.9rem; }
+            .section-title { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .upload-buttons { flex-direction: column; }
+            .upload-buttons .btn, .btn { width: 100%; }
+            .template-selector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .score-circles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .modal-content { width: 94%; padding: 1.25rem; }
+            .btn-sm { width: auto; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links a { font-size: 0.7rem; padding: 0.25rem 0.45rem; }
+            .page-header h1 { font-size: 1.35rem; }
+            .template-selector, .score-circles { grid-template-columns: 1fr; }
+            .upload-zone { padding: 1rem; }
+            .upload-zone p { font-size: 0.85rem; }
+            .form-group label, label { font-size: 0.7rem; }
+            input, textarea, select { font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>

@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraToolkit360 | HR Helper - Bulk Resume Screening</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; }
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; line-height: 1.5; overflow-x: hidden; }
         
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -121,7 +123,45 @@
         
         #fileCount { margin-top: 0.5rem; font-size: 0.8rem; color: #667eea; font-weight: 500; }
         
-        @media (max-width: 768px) { .container { padding: 1rem; } table { font-size: 0.7rem; } .filter-row { flex-direction: column; align-items: stretch; } .stat-box { min-width: 80px; padding: 0.75rem; } .page-header h1 { font-size: 1.6rem; } }
+        @media (max-width: 900px) {
+            .chart-container { flex-direction: column; }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0.7rem 1rem; }
+            .nav-container { flex-direction: column; align-items: stretch; }
+            .logo { font-size: 1.3rem; text-align: center; }
+            .nav-links { justify-content: center; }
+            .container { padding: 1rem; }
+            .page-header h1 { font-size: 1.6rem; }
+            .page-header p { font-size: 0.9rem; }
+            .card { padding: 1rem; }
+            .upload-zone { padding: 1.25rem; }
+            .filter-row { flex-direction: column; align-items: stretch; }
+            .filter-row label { width: 100%; }
+            .filter-row input[type="range"], .filter-row select { width: 100%; }
+            .filter-row .btn { width: 100%; }
+            .stats-row { flex-direction: column; }
+            .chart-container { gap: 1rem; }
+            .chart-card { min-width: 0; }
+            .bulk-actions { justify-content: stretch; }
+            .bulk-actions .btn { flex: 1 1 100%; }
+            .modal-content { width: 94%; padding: 1.25rem; }
+            table { font-size: 0.68rem; }
+            th, td { padding: 0.55rem 0.65rem; }
+            .stat-box { min-width: 80px; padding: 0.75rem; }
+            .results-table { overflow-x: auto; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links a { font-size: 0.7rem; padding: 0.25rem 0.45rem; }
+            .page-header h1 { font-size: 1.35rem; }
+            .upload-zone p { font-size: 0.85rem; }
+            .upload-zone small { font-size: 0.7rem; }
+            .btn { width: 100%; }
+            .stat-box .num { font-size: 1.45rem; }
+            .stat-box .lbl { font-size: 0.65rem; }
+        }
     </style>
 </head>
 <body>
