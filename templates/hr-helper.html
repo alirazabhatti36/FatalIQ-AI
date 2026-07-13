@@ -430,6 +430,7 @@
         let candidateStatus = {};
         let candidateNotes = {};
         let selectedCandidates = new Set();
+        let resumeTextCache = new Map();
         const ATS_BACKEND_BASE = 'https://auratoolkit-360.onrender.com';
 
         const stopWords = new Set([
@@ -478,6 +479,60 @@
             return { score, matched, missing };
         }
 
+        async function extractResumeText(file) {
+            if (resumeTextCache.has(file.name)) {
+                return resumeTextCache.get(file.name);
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to extract resume text');
+            }
+
+            const text = data.text || '';
+            resumeTextCache.set(file.name, text);
+            return text;
+        }
+
+        async function processResume(file, jobDesc, jobTitle, index, total) {
+            document.getElementById('processingInfo').innerHTML = `Processing ${index + 1} of ${total}: ${file.name}`;
+            const text = await extractResumeText(file);
+            const analysis = analyzeResumeAgainstDescription(text, jobDesc);
+
+            return {
+                id: index,
+                name: file.name,
+                title: jobTitle,
+                score: analysis.score,
+                matched: analysis.matched,
+                missing: analysis.missing,
+                status: candidateStatus[file.name] || 'pending',
+                notes: candidateNotes[file.name] || '',
+                file: file,
+                resumeText: text
+            };
+        }
+
+        async function runWithConcurrency(items, concurrency, worker) {
+            const results = new Array(items.length);
+            let nextIndex = 0;
+
+            async function runWorker() {
+                while (nextIndex < items.length) {
+                    const current = nextIndex++;
+                    results[current] = await worker(items[current], current, items.length);
+                    document.getElementById('progressFill').style.width = `${Math.round(((current + 1) / items.length) * 100)}%`;
+                }
+            }
+
+            const workers = Array.from({ length: Math.min(concurrency, items.length) }, () => runWorker());
+            await Promise.all(workers);
+            return results;
+        }
+
         document.getElementById('jobTitle').addEventListener('change', toggleCustomTitleField);
         document.getElementById('customJobTitle').addEventListener('input', updateRolePreview);
         updateRolePreview();
@@ -505,31 +560,13 @@
             candidateNotes = {};
             selectedCandidates.clear();
 
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i];
-                document.getElementById('processingInfo').innerHTML = `Processing ${i+1} of ${selectedFiles.length}: ${file.name}`;
-                document.getElementById('progressFill').style.width = `${((i+1)/selectedFiles.length)*100}%`;
-
+            const startedAt = performance.now();
+            const processed = await runWithConcurrency(selectedFiles, 4, async (file, index, total) => {
                 try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    const res = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
-                    const data = await res.json();
-                    const analysis = analyzeResumeAgainstDescription(data.text || '', jobDesc);
-                    bulkResults.push({
-                        id: i,
-                        name: data.filename || file.name,
-                        title: jobTitle,
-                        score: analysis.score,
-                        matched: analysis.matched,
-                        missing: analysis.missing,
-                        status: candidateStatus[file.name] || 'pending',
-                        notes: candidateNotes[file.name] || '',
-                        file: file
-                    });
-                } catch(e) {
-                    bulkResults.push({
-                        id: i,
+                    return await processResume(file, jobDesc, jobTitle, index, total);
+                } catch (e) {
+                    return {
+                        id: index,
                         name: file.name,
                         title: jobTitle,
                         score: 0,
@@ -537,11 +574,15 @@
                         missing: [],
                         status: 'pending',
                         notes: '',
-                        file: file
-                    });
+                        file: file,
+                        resumeText: ''
+                    };
                 }
-                await new Promise(r => setTimeout(r, 100));
-            }
+            });
+
+            bulkResults = processed;
+            const elapsed = Math.round(performance.now() - startedAt);
+            document.getElementById('processingInfo').innerHTML = `Completed ${selectedFiles.length} resumes in ${elapsed}ms`;
 
             document.getElementById('scanBtn').disabled = false;
             document.getElementById('scanBtn').textContent = '🚀 Start Screening';
@@ -674,14 +715,10 @@
             if (!candidate) return;
             currentDetailCandidate = candidate;
             
-            let resumeText = 'Unable to extract resume text.';
-            try {
-                const formData = new FormData();
-                formData.append('file', candidate.file);
-                const res = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
-                const data = await res.json();
-                if (data.text) resumeText = data.text.substring(0, 1000);
-            } catch(e) {}
+            let resumeText = candidate.resumeText || resumeTextCache.get(candidate.name) || 'Unable to extract resume text.';
+            if (resumeText !== 'Unable to extract resume text.') {
+                resumeText = resumeText.substring(0, 1000);
+            }
             
             document.getElementById('detailContent').innerHTML = `
                 <div><strong>📄 File:</strong> ${candidate.name}</div>
