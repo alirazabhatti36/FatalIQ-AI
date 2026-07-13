@@ -308,6 +308,8 @@
                 <label>📊 Status: <select id="statusFilter" onchange="renderTable()"><option value="all">All</option><option value="shortlisted">⭐ Shortlisted</option><option value="rejected">❌ Rejected</option><option value="pending">⏳ Pending</option></select></label>
                 <label>🔽 Sort: <select id="sortOrder" onchange="renderTable()"><option value="desc">Highest First</option><option value="asc">Lowest First</option></select></label>
                 <button class="btn btn-primary btn-glow" id="scanBtn" onclick="startBulkScan()">🚀 Start Screening</button>
+                <button class="btn btn-outline btn-sm" id="pauseBtn" onclick="togglePauseScan()" style="display:none;">⏸️ Pause Screening</button>
+                <button class="btn btn-outline btn-sm" id="cancelBtn" onclick="cancelScan()" style="display:none; border-color:#ef4444; color:#ef4444;">✖ Cancel Screening</button>
             </div>
 
             <div style="margin-top:0.85rem; padding:0.85rem 1rem; border-radius:14px; background:linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); border:1px solid rgba(102,126,234,0.12); color:#475569; font-size:0.85rem; line-height:1.55;">
@@ -435,6 +437,73 @@
         let pendingUploadResolvers = new Map();
         let pendingUploadRejectors = new Map();
         let pendingUploadCounter = 0;
+        let scanState = 'idle';
+        let pauseResolvers = [];
+
+        function updateScanControls() {
+            const scanBtn = document.getElementById('scanBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            if (!scanBtn || !pauseBtn || !cancelBtn) return;
+
+            if (scanState === 'idle') {
+                scanBtn.disabled = false;
+                scanBtn.textContent = '🚀 Start Screening';
+                pauseBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+            } else if (scanState === 'running') {
+                scanBtn.disabled = true;
+                scanBtn.textContent = '⏳ Scanning...';
+                pauseBtn.style.display = 'inline-flex';
+                pauseBtn.textContent = '⏸️ Pause Screening';
+                cancelBtn.style.display = 'inline-flex';
+            } else if (scanState === 'paused') {
+                scanBtn.disabled = true;
+                scanBtn.textContent = '⏸️ Paused';
+                pauseBtn.style.display = 'inline-flex';
+                pauseBtn.textContent = '▶️ Resume Screening';
+                cancelBtn.style.display = 'inline-flex';
+            } else if (scanState === 'cancelled') {
+                scanBtn.disabled = false;
+                scanBtn.textContent = '🚀 Start Screening';
+                pauseBtn.style.display = 'none';
+                cancelBtn.style.display = 'none';
+            }
+        }
+
+        function releasePausedWorkers() {
+            const resolvers = pauseResolvers.splice(0, pauseResolvers.length);
+            resolvers.forEach(resolve => resolve());
+        }
+
+        function waitIfPaused() {
+            if (scanState !== 'paused') return Promise.resolve();
+            return new Promise(resolve => pauseResolvers.push(resolve));
+        }
+
+        function togglePauseScan() {
+            if (scanState === 'running') {
+                scanState = 'paused';
+                document.getElementById('processingInfo').textContent = 'Scanning paused. You can resume or cancel.';
+                updateScanControls();
+                return;
+            }
+            if (scanState === 'paused') {
+                scanState = 'running';
+                document.getElementById('processingInfo').textContent = 'Resuming screening...';
+                updateScanControls();
+                releasePausedWorkers();
+            }
+        }
+
+        function cancelScan() {
+            if (scanState !== 'running' && scanState !== 'paused') return;
+            scanState = 'cancelled';
+            releasePausedWorkers();
+            document.getElementById('processingInfo').textContent = 'Screening cancelled.';
+            document.getElementById('progressBar').style.display = 'none';
+            updateScanControls();
+        }
 
         const stopWords = new Set([
             'the','and','for','are','with','this','that','you','your','have','from','will','can','was','they','their','been','has','but','not','all','our','its','also','more','when','which','a','an','in','of','to','is','on','at','we','us','he','she','it','them','his','her','them','these','those','as','by','be','been','being','or','if','into','than','then','there','here','over','under','up','down','out','per','via','into','about','after','before','during','between','within','without','one','two','three','four','five','six','seven','eight','nine','ten'
@@ -568,8 +637,13 @@
         });
 
         async function processResume(file, jobDesc, jobTitle, index, total) {
+            if (scanState === 'cancelled') throw new Error('cancelled');
+            await waitIfPaused();
+            if (scanState === 'cancelled') throw new Error('cancelled');
             document.getElementById('processingInfo').innerHTML = `Processing ${index + 1} of ${total}: ${file.name}`;
             const text = await extractResumeText(file);
+            await waitIfPaused();
+            if (scanState === 'cancelled') throw new Error('cancelled');
             const analysis = analyzeResumeAgainstDescription(text, jobDesc);
 
             return {
@@ -592,6 +666,9 @@
 
             async function runWorker() {
                 while (nextIndex < items.length) {
+                    if (scanState === 'cancelled') return;
+                    await waitIfPaused();
+                    if (scanState === 'cancelled') return;
                     const current = nextIndex++;
                     results[current] = await worker(items[current], current, items.length);
                     document.getElementById('progressFill').style.width = `${Math.round(((current + 1) / items.length) * 100)}%`;
@@ -618,8 +695,8 @@
             const jobDesc = document.getElementById('jobDesc').value.trim();
             if (!jobDesc) { alert('Please paste job description!'); return; }
 
-            document.getElementById('scanBtn').disabled = true;
-            document.getElementById('scanBtn').textContent = '⏳ Scanning...';
+            scanState = 'running';
+            updateScanControls();
             document.getElementById('progressBar').style.display = 'block';
             document.getElementById('processingInfo').style.display = 'block';
             document.getElementById('resultsDiv').style.display = 'none';
@@ -635,6 +712,7 @@
                 try {
                     return await processResume(file, jobDesc, jobTitle, index, total);
                 } catch (e) {
+                    if (scanState === 'cancelled') return null;
                     return {
                         id: index,
                         name: file.name,
@@ -650,12 +728,14 @@
                 }
             });
 
-            bulkResults = processed;
+            bulkResults = processed.filter(Boolean);
             const elapsed = Math.round(performance.now() - startedAt);
-            document.getElementById('processingInfo').innerHTML = `Completed ${selectedFiles.length} resumes in ${elapsed}ms`;
+            document.getElementById('processingInfo').innerHTML = scanState === 'cancelled'
+                ? `Screening cancelled after ${bulkResults.length} resume(s).`
+                : `Completed ${bulkResults.length} resumes in ${elapsed}ms`;
 
-            document.getElementById('scanBtn').disabled = false;
-            document.getElementById('scanBtn').textContent = '🚀 Start Screening';
+            scanState = 'idle';
+            updateScanControls();
             document.getElementById('progressBar').style.display = 'none';
             document.getElementById('processingInfo').style.display = 'none';
             renderStatsAndCharts();
