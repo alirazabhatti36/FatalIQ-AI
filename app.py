@@ -95,6 +95,26 @@ def about():
 def blogs():
     return render_template('blogs.html')
 
+@app.route('/disclaimer')
+def disclaimer():
+    return render_template('disclaimer.html')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
+
+@app.route('/404')
+def custom_404_page():
+    return send_from_directory(app.root_path, '404.html')
+
+@app.errorhandler(404)
+def not_found(_error):
+    return send_from_directory(app.root_path, '404.html'), 404
+
 @app.route('/favicon.svg')
 def favicon_svg():
     return send_from_directory(app.root_path, 'favicon.svg', mimetype='image/svg+xml')
