@@ -28,6 +28,8 @@
             "inLanguage": "en"
         }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { overflow-x: hidden; }
@@ -431,7 +433,10 @@
         let candidateNotes = {};
         let selectedCandidates = new Set();
         let resumeTextCache = new Map();
-        const ATS_BACKEND_BASE = 'https://auratoolkit-360.onrender.com';
+
+        if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+        }
 
         const stopWords = new Set([
             'the','and','for','are','with','this','that','you','your','have','from','will','can','was','they','their','been','has','but','not','all','our','its','also','more','when','which','a','an','in','of','to','is','on','at','we','us','he','she','it','them','his','her','them','these','those','as','by','be','been','being','or','if','into','than','then','there','here','over','under','up','down','out','per','via','into','about','after','before','during','between','within','without','one','two','three','four','five','six','seven','eight','nine','ten'
@@ -484,15 +489,29 @@
                 return resumeTextCache.get(file.name);
             }
 
-            const formData = new FormData();
-            formData.append('file', file);
-            const response = await fetch(`${ATS_BACKEND_BASE}/upload-linkedin-file`, { method: 'POST', body: formData });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to extract resume text');
+            const lowerName = file.name.toLowerCase();
+            let text = '';
+
+            if (lowerName.endsWith('.pdf')) {
+                const buffer = await file.arrayBuffer();
+                const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+                const pages = [];
+                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+                    const page = await pdf.getPage(pageNumber);
+                    const content = await page.getTextContent();
+                    pages.push(content.items.map(item => item.str).join(' '));
+                }
+                text = pages.join(' ');
+            } else if (lowerName.endsWith('.docx')) {
+                const buffer = await file.arrayBuffer();
+                const result = await window.mammoth.extractRawText({ arrayBuffer: buffer });
+                text = result.value || '';
+            } else if (lowerName.endsWith('.txt')) {
+                text = new TextDecoder('utf-8').decode(await file.arrayBuffer());
+            } else {
+                throw new Error('Unsupported file type. Use PDF or DOCX.');
             }
 
-            const text = data.text || '';
             resumeTextCache.set(file.name, text);
             return text;
         }
