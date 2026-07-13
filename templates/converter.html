@@ -319,7 +319,16 @@
     </div>
 
     <script>
-        const BACKEND_BASE_URL = 'https://aura-toolkit-360.onrender.com';
+        const DEFAULT_BACKEND_BASE_URL = 'https://auratoolkit-360.onrender.com';
+
+        function resolveBackendBaseUrl() {
+            if (window.location.hostname.endsWith('.onrender.com')) {
+                return window.location.origin;
+            }
+            return DEFAULT_BACKEND_BASE_URL;
+        }
+
+        const BACKEND_BASE_URL = resolveBackendBaseUrl();
 
         async function isBackendOnline() {
             try {
