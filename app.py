@@ -56,18 +56,26 @@ def extract_text_from_pdf(path):
 #  PAGES (MAIN)
 # ─────────────────────────────────────────
 @app.route('/')
+@app.route('/index.html')
+@app.route('/templates/index.html')
 def home():
     return render_template('index.html')
 
 @app.route('/converter')
+@app.route('/converter.html')
+@app.route('/templates/converter.html')
 def converter():
     return render_template('converter.html')
 
 @app.route('/resume-ats')
+@app.route('/resume-ats.html')
+@app.route('/templates/resume-ats.html')
 def resume_ats():
     return render_template('resume-ats.html')
 
 @app.route('/hr-helper')
+@app.route('/hr-helper.html')
+@app.route('/templates/hr-helper.html')
 def hr_helper():
     return render_template('hr-helper.html')
 
@@ -76,26 +84,38 @@ def hr_helper():
 # ─────────────────────────────────────────
 
 @app.route('/privacy-policy')
+@app.route('/privacy-policy.html')
+@app.route('/templates/privacy-policy.html')
 def privacy_policy():
     return render_template('privacy-policy.html')
 
 @app.route('/terms')
+@app.route('/terms.html')
+@app.route('/templates/terms.html')
 def terms():
     return render_template('terms.html')
 
 @app.route('/contact')
+@app.route('/contact.html')
+@app.route('/templates/contact.html')
 def contact():
     return render_template('contact.html')
 
 @app.route('/about')
+@app.route('/about.html')
+@app.route('/templates/about.html')
 def about():
     return render_template('about.html')
 
 @app.route('/blogs')
+@app.route('/blogs.html')
+@app.route('/templates/blogs.html')
 def blogs():
     return render_template('blogs.html')
 
 @app.route('/disclaimer')
+@app.route('/disclaimer.html')
+@app.route('/templates/disclaimer.html')
 def disclaimer():
     return render_template('disclaimer.html')
 
