@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, send_from_directory, render_template, jsonify, redirect
+from flask import Flask, request, send_file, send_from_directory, render_template, jsonify, redirect, abort
 from docx2pdf import convert as docx_to_pdf
 from pdf2docx import Converter as PDFToWordConverter
 from reportlab.lib.pagesizes import A4, letter
@@ -32,8 +32,22 @@ except ImportError:
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 UPLOAD = 'uploads'
 os.makedirs(UPLOAD, exist_ok=True)
+
+PAGE_TEMPLATES = {
+    'index': 'index.html',
+    'converter': 'converter.html',
+    'resume-ats': 'resume-ats.html',
+    'hr-helper': 'hr-helper.html',
+    'privacy-policy': 'privacy-policy.html',
+    'terms': 'terms.html',
+    'contact': 'contact.html',
+    'about': 'about.html',
+    'blogs': 'blogs.html',
+    'disclaimer': 'disclaimer.html',
+}
 
 def save(file, name):
     path = os.path.join(UPLOAD, name)
@@ -118,6 +132,22 @@ def blogs():
 @app.route('/templates/disclaimer.html')
 def disclaimer():
     return render_template('disclaimer.html')
+
+
+@app.route('/templates/<path:template_file>')
+def templates_alias(template_file):
+    template_name = template_file.strip().lower()
+    if template_name in PAGE_TEMPLATES.values():
+        return render_template(template_name)
+    abort(404)
+
+
+@app.route('/<page>.html')
+def html_alias(page):
+    template_name = PAGE_TEMPLATES.get(page.strip().lower())
+    if template_name:
+        return render_template(template_name)
+    abort(404)
 
 @app.route('/sitemap.xml')
 def sitemap():
