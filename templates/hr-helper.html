@@ -287,6 +287,36 @@
         </div>
     </div>
 
+    <footer style="margin-top:2rem; background:#ffffff; border-top:1px solid #e2e8f0; box-shadow:0 -4px 20px rgba(0,0,0,0.04);">
+        <div style="max-width:1400px; margin:0 auto; padding:1.5rem 1rem; display:flex; flex-wrap:wrap; gap:1.2rem; align-items:flex-start;">
+            <div style="flex:1 1 280px; color:#475569;">
+                <h3 style="font-size:1rem; margin-bottom:0.45rem; color:#1e293b;">AuraToolkit360</h3>
+                <p style="font-size:0.85rem; line-height:1.6;">Screen candidates in bulk, shortlist faster, and streamline your hiring workflow.</p>
+                <p style="font-size:0.8rem; margin-top:0.5rem;"><strong>Email:</strong> info@auratoolkit360.com</p>
+            </div>
+            <div style="flex:1 1 220px; color:#475569;">
+                <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Quick Links</h4>
+                <div style="display:grid; gap:0.35rem; font-size:0.82rem;">
+                    <a href="/templates/index.html" style="color:#475569; text-decoration:none;">Home</a>
+                    <a href="/templates/converter.html" style="color:#475569; text-decoration:none;">Converter</a>
+                    <a href="/templates/resume-ats.html" style="color:#475569; text-decoration:none;">Resume Builder & ATS</a>
+                    <a href="/templates/privacy-policy.html" style="color:#475569; text-decoration:none;">Privacy Policy</a>
+                    <a href="/templates/terms.html" style="color:#475569; text-decoration:none;">Terms</a>
+                </div>
+            </div>
+            <div style="flex:1 1 320px; color:#475569;">
+                <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Feedback</h4>
+                <form onsubmit="event.preventDefault(); const fd=new FormData(this); const body='Name: '+fd.get('name')+'\nEmail: '+fd.get('email')+'\n\nFeedback:\n'+fd.get('message'); window.location.href='mailto:info@auratoolkit360.com?subject='+encodeURIComponent('AuraToolkit360 Feedback')+'&body='+encodeURIComponent(body); this.reset(); alert('Thanks! Your email client is opening.');">
+                    <input name="name" type="text" placeholder="Your name" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+                    <input name="email" type="email" placeholder="Your email" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+                    <textarea name="message" rows="3" placeholder="Share your feedback..." required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; resize:vertical; margin-bottom:0.5rem;"></textarea>
+                    <button type="submit" style="background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:10px; padding:0.45rem 0.9rem; font-size:0.8rem; cursor:pointer;">Send Feedback</button>
+                </form>
+            </div>
+        </div>
+        <div style="border-top:1px solid #e2e8f0; text-align:center; padding:0.75rem; font-size:0.75rem; color:#64748b;">© 2026 AuraToolkit360. All rights reserved.</div>
+    </footer>
+
     <script>
         let selectedFiles = [];
         let bulkResults = [];

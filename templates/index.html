@@ -409,19 +409,34 @@
     </div>
 
     <!-- ===== FOOTER ===== -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-links">
-                <a href="/templates/privacy-policy.html">Privacy Policy</a>
-                <a href="/templates/terms.html">Terms &amp; Conditions</a>
-                <a href="/templates/contact.html">Contact Us</a>
-                <a href="/templates/about.html">About Us</a>
-                <a href="/templates/blogs.html">Blogs</a>
+    <footer class="footer" style="padding:1.5rem 1rem;">
+        <div style="max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:1.2rem; align-items:flex-start;">
+            <div style="flex:1 1 280px; color:rgba(255,255,255,0.85);">
+                <h3 style="font-size:1rem; margin-bottom:0.45rem;">AuraToolkit360</h3>
+                <p style="font-size:0.82rem; line-height:1.6;">Smart toolkit for file conversions, ATS-ready resumes, and HR automation.</p>
+                <p style="font-size:0.78rem; margin-top:0.5rem;"><strong>Email:</strong> info@auratoolkit360.com</p>
             </div>
-            <div class="footer-copy">
-                &copy; 2025 AuraToolkit360 — Empowering Your Productivity
+            <div style="flex:1 1 220px; color:rgba(255,255,255,0.85);">
+                <h4 style="font-size:0.88rem; margin-bottom:0.45rem;">Quick Links</h4>
+                <div style="display:grid; gap:0.35rem; font-size:0.78rem;">
+                    <a href="/templates/about.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">About</a>
+                    <a href="/templates/blogs.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Blogs</a>
+                    <a href="/templates/contact.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Contact</a>
+                    <a href="/templates/privacy-policy.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Privacy Policy</a>
+                    <a href="/templates/terms.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Terms</a>
+                </div>
+            </div>
+            <div style="flex:1 1 320px; color:rgba(255,255,255,0.85);">
+                <h4 style="font-size:0.88rem; margin-bottom:0.45rem;">Feedback</h4>
+                <form onsubmit="event.preventDefault(); const fd=new FormData(this); const body='Name: '+fd.get('name')+'\nEmail: '+fd.get('email')+'\n\nFeedback:\n'+fd.get('message'); window.location.href='mailto:info@auratoolkit360.com?subject='+encodeURIComponent('AuraToolkit360 Feedback')+'&body='+encodeURIComponent(body); this.reset(); alert('Thanks! Your email client is opening.');">
+                    <input name="name" type="text" placeholder="Your name" required style="width:100%; padding:0.45rem 0.65rem; border:1px solid rgba(255,255,255,0.25); border-radius:10px; font-size:0.78rem; margin-bottom:0.4rem; background:rgba(255,255,255,0.1); color:#fff;">
+                    <input name="email" type="email" placeholder="Your email" required style="width:100%; padding:0.45rem 0.65rem; border:1px solid rgba(255,255,255,0.25); border-radius:10px; font-size:0.78rem; margin-bottom:0.4rem; background:rgba(255,255,255,0.1); color:#fff;">
+                    <textarea name="message" rows="3" placeholder="Share your feedback..." required style="width:100%; padding:0.45rem 0.65rem; border:1px solid rgba(255,255,255,0.25); border-radius:10px; font-size:0.78rem; resize:vertical; margin-bottom:0.5rem; background:rgba(255,255,255,0.1); color:#fff;"></textarea>
+                    <button type="submit" style="background:#ffffff; color:#1a202c; border:none; border-radius:10px; padding:0.42rem 0.9rem; font-size:0.78rem; cursor:pointer; font-weight:600;">Send Feedback</button>
+                </form>
             </div>
         </div>
+        <div class="footer-copy" style="margin-top:0.9rem; border-top:1px solid rgba(255,255,255,0.15); padding-top:0.75rem;">&copy; 2026 AuraToolkit360 — Empowering Your Productivity</div>
     </footer>
 </body>
 </html>
