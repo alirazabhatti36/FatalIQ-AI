@@ -202,9 +202,9 @@
             <div class="logo">AuraToolkit360</div>
             <div class="nav-links">
                 <a href="/">Home</a>
-                <a href="/converter">Converter</a>
-                <a href="/resume-ats">Resume Builder &amp; ATS</a>
-                <a href="/hr-helper">HR Helper</a>
+                <a href="/templates/converter.html">Converter</a>
+                <a href="/templates/resume-ats.html">Resume Builder &amp; ATS</a>
+                <a href="/templates/hr-helper.html">HR Helper</a>
             </div>
         </div>
     </nav>
@@ -240,47 +240,47 @@
     <script>
         const toolsDatabase = [
             // Office Converters
-            { name: "Word to PDF", icon: "📝→📕", url: "/converter", category: "Office", keywords: ["word", "docx", "pdf", "convert", "document"] },
-            { name: "PDF to Word", icon: "📕→📝", url: "/converter", category: "Office", keywords: ["pdf", "word", "docx", "convert", "document"] },
-            { name: "PPT to PDF", icon: "📊→📕", url: "/converter", category: "Office", keywords: ["ppt", "powerpoint", "pdf", "convert", "presentation"] },
-            { name: "Excel to PDF", icon: "📗→📕", url: "/converter", category: "Office", keywords: ["excel", "xlsx", "pdf", "convert", "spreadsheet"] },
-            { name: "RTF to DOCX", icon: "📄→📝", url: "/converter", category: "Office", keywords: ["rtf", "docx", "word", "convert"] },
-            { name: "TXT to PDF", icon: "📄→📕", url: "/converter", category: "Office", keywords: ["txt", "text", "pdf", "convert"] },
+            { name: "Word to PDF", icon: "📝→📕", url: "/templates/converter.html", category: "Office", keywords: ["word", "docx", "pdf", "convert", "document"] },
+            { name: "PDF to Word", icon: "📕→📝", url: "/templates/converter.html", category: "Office", keywords: ["pdf", "word", "docx", "convert", "document"] },
+            { name: "PPT to PDF", icon: "📊→📕", url: "/templates/converter.html", category: "Office", keywords: ["ppt", "powerpoint", "pdf", "convert", "presentation"] },
+            { name: "Excel to PDF", icon: "📗→📕", url: "/templates/converter.html", category: "Office", keywords: ["excel", "xlsx", "pdf", "convert", "spreadsheet"] },
+            { name: "RTF to DOCX", icon: "📄→📝", url: "/templates/converter.html", category: "Office", keywords: ["rtf", "docx", "word", "convert"] },
+            { name: "TXT to PDF", icon: "📄→📕", url: "/templates/converter.html", category: "Office", keywords: ["txt", "text", "pdf", "convert"] },
             
             // PDF Tools
-            { name: "Merge PDF", icon: "➕", url: "/converter", category: "PDF", keywords: ["merge", "combine", "join", "pdf", "multiple files"] },
-            { name: "Split PDF", icon: "✂️", url: "/converter", category: "PDF", keywords: ["split", "divide", "separate", "pdf", "pages"] },
-            { name: "Compress PDF", icon: "🗜️", url: "/converter", category: "PDF", keywords: ["compress", "reduce", "size", "pdf", "smaller"] },
-            { name: "Rotate PDF", icon: "🔄", url: "/converter", category: "PDF", keywords: ["rotate", "turn", "pdf", "pages", "orientation"] },
-            { name: "Lock PDF", icon: "🔒", url: "/converter", category: "PDF", keywords: ["lock", "password", "protect", "secure", "pdf"] },
-            { name: "Unlock PDF", icon: "🔓", url: "/converter", category: "PDF", keywords: ["unlock", "remove password", "pdf", "decrypt"] },
-            { name: "Add Watermark", icon: "💧", url: "/converter", category: "PDF", keywords: ["watermark", "text", "overlay", "pdf", "protect"] },
-            { name: "Delete Pages", icon: "🗑️", url: "/converter", category: "PDF", keywords: ["delete", "remove", "pages", "pdf", "extract"] },
-            { name: "Extract Pages", icon: "📤", url: "/converter", category: "PDF", keywords: ["extract", "save", "pages", "pdf", "separate"] },
-            { name: "Add Page Numbers", icon: "🔢", url: "/converter", category: "PDF", keywords: ["page numbers", "numbering", "pdf", "footer"] },
-            { name: "PDF to Image", icon: "🖼️", url: "/converter", category: "PDF", keywords: ["pdf", "image", "png", "jpg", "convert"] },
-            { name: "PDF to TXT", icon: "📄", url: "/converter", category: "PDF", keywords: ["pdf", "text", "extract", "txt", "convert"] },
+            { name: "Merge PDF", icon: "➕", url: "/templates/converter.html", category: "PDF", keywords: ["merge", "combine", "join", "pdf", "multiple files"] },
+            { name: "Split PDF", icon: "✂️", url: "/templates/converter.html", category: "PDF", keywords: ["split", "divide", "separate", "pdf", "pages"] },
+            { name: "Compress PDF", icon: "🗜️", url: "/templates/converter.html", category: "PDF", keywords: ["compress", "reduce", "size", "pdf", "smaller"] },
+            { name: "Rotate PDF", icon: "🔄", url: "/templates/converter.html", category: "PDF", keywords: ["rotate", "turn", "pdf", "pages", "orientation"] },
+            { name: "Lock PDF", icon: "🔒", url: "/templates/converter.html", category: "PDF", keywords: ["lock", "password", "protect", "secure", "pdf"] },
+            { name: "Unlock PDF", icon: "🔓", url: "/templates/converter.html", category: "PDF", keywords: ["unlock", "remove password", "pdf", "decrypt"] },
+            { name: "Add Watermark", icon: "💧", url: "/templates/converter.html", category: "PDF", keywords: ["watermark", "text", "overlay", "pdf", "protect"] },
+            { name: "Delete Pages", icon: "🗑️", url: "/templates/converter.html", category: "PDF", keywords: ["delete", "remove", "pages", "pdf", "extract"] },
+            { name: "Extract Pages", icon: "📤", url: "/templates/converter.html", category: "PDF", keywords: ["extract", "save", "pages", "pdf", "separate"] },
+            { name: "Add Page Numbers", icon: "🔢", url: "/templates/converter.html", category: "PDF", keywords: ["page numbers", "numbering", "pdf", "footer"] },
+            { name: "PDF to Image", icon: "🖼️", url: "/templates/converter.html", category: "PDF", keywords: ["pdf", "image", "png", "jpg", "convert"] },
+            { name: "PDF to TXT", icon: "📄", url: "/templates/converter.html", category: "PDF", keywords: ["pdf", "text", "extract", "txt", "convert"] },
             
             // Image Tools
-            { name: "Image to PDF", icon: "🖼️→📕", url: "/converter", category: "Image", keywords: ["image", "pdf", "png", "jpg", "convert"] },
-            { name: "Image to Word (OCR)", icon: "🖼️→📝", url: "/converter", category: "Image", keywords: ["image", "word", "ocr", "extract", "text"] },
-            { name: "Image to Excel (OCR)", icon: "🖼️→📊", url: "/converter", category: "Image", keywords: ["image", "excel", "ocr", "extract", "data"] },
-            { name: "OCR to Text", icon: "📄", url: "/converter", category: "Image", keywords: ["ocr", "image", "text", "extract", "scan"] },
-            { name: "JPG to PNG", icon: "JPG→PNG", url: "/converter", category: "Image", keywords: ["jpg", "png", "convert", "image"] },
-            { name: "PNG to JPG", icon: "PNG→JPG", url: "/converter", category: "Image", keywords: ["png", "jpg", "convert", "image"] },
-            { name: "WEBP to PNG", icon: "WEBP→PNG", url: "/converter", category: "Image", keywords: ["webp", "png", "convert", "image"] },
-            { name: "SVG to PNG", icon: "SVG→PNG", url: "/converter", category: "Image", keywords: ["svg", "png", "convert", "vector", "image"] },
-            { name: "Compress Image", icon: "🗜️", url: "/converter", category: "Image", keywords: ["compress", "reduce", "size", "image", "quality"] },
+            { name: "Image to PDF", icon: "🖼️→📕", url: "/templates/converter.html", category: "Image", keywords: ["image", "pdf", "png", "jpg", "convert"] },
+            { name: "Image to Word (OCR)", icon: "🖼️→📝", url: "/templates/converter.html", category: "Image", keywords: ["image", "word", "ocr", "extract", "text"] },
+            { name: "Image to Excel (OCR)", icon: "🖼️→📊", url: "/templates/converter.html", category: "Image", keywords: ["image", "excel", "ocr", "extract", "data"] },
+            { name: "OCR to Text", icon: "📄", url: "/templates/converter.html", category: "Image", keywords: ["ocr", "image", "text", "extract", "scan"] },
+            { name: "JPG to PNG", icon: "JPG→PNG", url: "/templates/converter.html", category: "Image", keywords: ["jpg", "png", "convert", "image"] },
+            { name: "PNG to JPG", icon: "PNG→JPG", url: "/templates/converter.html", category: "Image", keywords: ["png", "jpg", "convert", "image"] },
+            { name: "WEBP to PNG", icon: "WEBP→PNG", url: "/templates/converter.html", category: "Image", keywords: ["webp", "png", "convert", "image"] },
+            { name: "SVG to PNG", icon: "SVG→PNG", url: "/templates/converter.html", category: "Image", keywords: ["svg", "png", "convert", "vector", "image"] },
+            { name: "Compress Image", icon: "🗜️", url: "/templates/converter.html", category: "Image", keywords: ["compress", "reduce", "size", "image", "quality"] },
             
             // Resume Builder & ATS
-            { name: "Resume Builder", icon: "📄", url: "/resume-ats", category: "Resume", keywords: ["resume", "cv", "build", "create", "professional"] },
-            { name: "ATS Scanner", icon: "🎯", url: "/resume-ats", category: "Resume", keywords: ["ats", "scan", "score", "resume", "job description"] },
-            { name: "Cover Letter Generator", icon: "📝", url: "/resume-ats", category: "Resume", keywords: ["cover letter", "generate", "write", "application"] },
+            { name: "Resume Builder", icon: "📄", url: "/templates/resume-ats.html", category: "Resume", keywords: ["resume", "cv", "build", "create", "professional"] },
+            { name: "ATS Scanner", icon: "🎯", url: "/templates/resume-ats.html", category: "Resume", keywords: ["ats", "scan", "score", "resume", "job description"] },
+            { name: "Cover Letter Generator", icon: "📝", url: "/templates/resume-ats.html", category: "Resume", keywords: ["cover letter", "generate", "write", "application"] },
             
             // HR Helper
-            { name: "Bulk Resume Screening", icon: "👥", url: "/hr-helper", category: "HR", keywords: ["hr", "bulk", "screening", "resume", "recruitment"] },
-            { name: "Candidate Shortlisting", icon: "⭐", url: "/hr-helper", category: "HR", keywords: ["shortlist", "candidate", "hr", "recruitment"] },
-            { name: "Bulk Email", icon: "📧", url: "/hr-helper", category: "HR", keywords: ["email", "bulk", "candidate", "hr", "communication"] },
+            { name: "Bulk Resume Screening", icon: "👥", url: "/templates/hr-helper.html", category: "HR", keywords: ["hr", "bulk", "screening", "resume", "recruitment"] },
+            { name: "Candidate Shortlisting", icon: "⭐", url: "/templates/hr-helper.html", category: "HR", keywords: ["shortlist", "candidate", "hr", "recruitment"] },
+            { name: "Bulk Email", icon: "📧", url: "/templates/hr-helper.html", category: "HR", keywords: ["email", "bulk", "candidate", "hr", "communication"] },
         ];
 
         const searchInput = document.getElementById('searchInput');
@@ -358,21 +358,21 @@
 
     <!-- ===== CARDS ===== -->
     <div class="cards-container">
-        <a href="/converter" class="card">
+        <a href="/templates/converter.html" class="card">
             <div class="card-icon">🔄</div>
             <h2>File Converter</h2>
             <p>Convert PDF, Word, Excel, PPT, Images — 30+ formats</p>
             <span class="badge badge-blue">30+ Tools</span>
         </a>
 
-        <a href="/resume-ats" class="card">
+        <a href="/templates/resume-ats.html" class="card">
             <div class="card-icon">📄🎯</div>
             <h2>Resume Builder &amp; ATS</h2>
             <p>Build resumes + Real-time ATS score &amp; suggestions</p>
             <span class="badge badge-green">AI Powered</span>
         </a>
 
-        <a href="/hr-helper" class="card">
+        <a href="/templates/hr-helper.html" class="card">
             <div class="card-icon">👥</div>
             <h2>HR Helper</h2>
             <p>Bulk resume screening against job description (300+ resumes)</p>
@@ -404,11 +404,11 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-links">
-                <a href="/privacy-policy">Privacy Policy</a>
-                <a href="/terms">Terms &amp; Conditions</a>
-                <a href="/contact">Contact Us</a>
-                <a href="/about">About Us</a>
-                <a href="/blogs">Blogs</a>
+                <a href="/templates/privacy-policy.html">Privacy Policy</a>
+                <a href="/templates/terms.html">Terms &amp; Conditions</a>
+                <a href="/templates/contact.html">Contact Us</a>
+                <a href="/templates/about.html">About Us</a>
+                <a href="/templates/blogs.html">Blogs</a>
             </div>
             <div class="footer-copy">
                 &copy; 2025 AuraToolkit360 — Empowering Your Productivity
