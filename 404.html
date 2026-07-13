@@ -71,5 +71,28 @@
     <footer class="footer">
         <p>© 2025 AuraToolkit360 — Empowering Your Productivity</p>
     </footer>
+
+    <script>
+        (function() {
+            const redirects = {
+                '/converter': '/templates/converter.html',
+                '/resume-ats': '/templates/resume-ats.html',
+                '/hr-helper': '/templates/hr-helper.html',
+                '/privacy-policy': '/templates/privacy-policy.html',
+                '/terms': '/templates/terms.html',
+                '/contact': '/templates/contact.html',
+                '/about': '/templates/about.html',
+                '/blogs': '/templates/blogs.html',
+                '/disclaimer': '/templates/disclaimer.html'
+            };
+
+            const path = window.location.pathname.replace(/\/+$/, '');
+            const target = redirects[path];
+
+            if (target) {
+                window.location.replace(target + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
 </body>
 </html>
