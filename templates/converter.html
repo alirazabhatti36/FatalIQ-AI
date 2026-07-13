@@ -330,26 +330,11 @@
 
         const BACKEND_BASE_URL = resolveBackendBaseUrl();
 
-        async function isBackendOnline() {
-            try {
-                const res = await fetch(BACKEND_BASE_URL + '/health', { method: 'GET', mode: 'cors' });
-                return res.ok;
-            } catch (_error) {
-                return false;
-            }
-        }
-
         document.querySelectorAll('form[action^="/"]').forEach(form => {
             const originalPath = form.getAttribute('action');
 
-            form.addEventListener('submit', async event => {
+            form.addEventListener('submit', event => {
                 event.preventDefault();
-
-                const online = await isBackendOnline();
-                if (!online) {
-                    alert('Converter backend is not live yet on Render. Please deploy/start Render service, then try again.');
-                    return;
-                }
 
                 form.setAttribute('action', BACKEND_BASE_URL + originalPath);
                 form.submit();
