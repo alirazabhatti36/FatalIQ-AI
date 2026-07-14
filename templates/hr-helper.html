@@ -572,7 +572,7 @@
                 form.method = 'POST';
                 form.enctype = 'multipart/form-data';
                 form.target = 'atsUploadTransport';
-                form.action = `https://auratoolkit-360.onrender.com/upload-linkedin-file?transport=message`;
+                form.action = `https://web-production-8b35f.up.railway.app/upload-linkedin-file?transport=message`;
 
                 const fileInput = document.createElement('input');
                 fileInput.type = 'file';
@@ -623,7 +623,7 @@
         }
 
         window.addEventListener('message', (event) => {
-            if (event.origin !== 'https://auratoolkit-360.onrender.com') return;
+            if (event.origin !== 'https://web-production-8b35f.up.railway.app') return;
             const data = event.data || {};
             if (data.type !== 'ats-upload-result' || !data.token) return;
 
