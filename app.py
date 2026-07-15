@@ -227,6 +227,10 @@ def sitemap():
 def robots():
     return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
 
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory(app.root_path, 'ads.txt', mimetype='text/plain')
+
 @app.route('/health')
 def health():
     return jsonify({'status': 'ok'})
