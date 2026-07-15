@@ -231,6 +231,10 @@ def robots():
 def ads_txt():
     return send_from_directory(app.root_path, 'ads.txt', mimetype='text/plain')
 
+@app.route('/tracking-consent.js')
+def tracking_consent_js():
+    return send_from_directory(app.root_path, 'tracking-consent.js', mimetype='application/javascript')
+
 @app.route('/health')
 def health():
     return jsonify({'status': 'ok'})
