@@ -167,8 +167,26 @@
       '#atk360-consent-modal button{border:0;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer}' +
       '#atk360-modal-cancel{background:#334155;color:#e2e8f0}' +
       '#atk360-modal-save{background:#22c55e;color:#052e16}' +
+      '#atk360-cookie-settings-btn{position:fixed;right:12px;bottom:12px;z-index:9998;border:1px solid #334155;border-radius:999px;background:#0f172a;color:#e2e8f0;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.25)}' +
       '@media (max-width:640px){#atk360-consent-banner{left:8px;right:8px;bottom:8px;padding:10px}#atk360-consent-banner p{font-size:12px}}';
     document.head.appendChild(style);
+  }
+
+  function ensureCookieSettingsButton() {
+    ensureStyle();
+    if (document.getElementById('atk360-cookie-settings-btn')) {
+      return;
+    }
+
+    var btn = document.createElement('button');
+    btn.id = 'atk360-cookie-settings-btn';
+    btn.type = 'button';
+    btn.textContent = 'Cookie Settings';
+    btn.addEventListener('click', function () {
+      openPreferencesModal(getStoredPrefs() || defaultPrefs());
+    });
+
+    document.body.appendChild(btn);
   }
 
   function saveAndApplyPrefs(prefs) {
@@ -243,6 +261,8 @@
   }
 
   function start() {
+    ensureCookieSettingsButton();
+
     var prefs = getStoredPrefs();
     if (prefs) {
       applyPreferences(prefs);
@@ -258,6 +278,7 @@
   }
 
   window.openCookieSettings = function () {
+    ensureCookieSettingsButton();
     injectBanner();
     openPreferencesModal(getStoredPrefs() || defaultPrefs());
   };
