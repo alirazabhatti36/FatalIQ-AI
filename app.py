@@ -5,6 +5,9 @@ import os, re, io, zipfile, shutil
 import json
 import tempfile
 import importlib
+import time
+import csv
+import html
 
 # --- LinkedIn Optimizer import HATAYA ---
 # from linkedin_optimizer import analyze_linkedin_profile, fetch_profile_from_url
@@ -18,6 +21,31 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 UPLOAD = 'uploads'
 os.makedirs(UPLOAD, exist_ok=True)
+UPLOAD_RETENTION_SECONDS = int(os.getenv('UPLOAD_RETENTION_SECONDS', '900'))
+
+def purge_uploads(force=False, max_age_seconds=UPLOAD_RETENTION_SECONDS):
+    now = time.time()
+    try:
+        for name in os.listdir(UPLOAD):
+            path = os.path.join(UPLOAD, name)
+            if not os.path.isfile(path):
+                continue
+            if force:
+                os.remove(path)
+                continue
+            age = now - os.path.getmtime(path)
+            if age > max_age_seconds:
+                os.remove(path)
+    except Exception:
+        # Never block requests due to cleanup failures.
+        pass
+
+# Clear stale files on startup to avoid persistent leftovers across deploys.
+purge_uploads(force=True)
+
+@app.before_request
+def cleanup_user_files():
+    purge_uploads(force=False)
 
 @app.after_request
 def add_cors_headers(response):
@@ -27,6 +55,11 @@ def add_cors_headers(response):
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         response.headers['Vary'] = 'Origin'
+
+    # Privacy-first policy: prevent browser/proxy caching of user-generated files.
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
     return response
 
 PAGE_TEMPLATES = {
@@ -490,6 +523,83 @@ def excel_to_csv():
     except Exception as e:
         return jsonify({'error': f'Excel to CSV failed: {str(e)}'}), 500
 
+@app.route('/word-to-html', methods=['POST'])
+def word_to_html():
+    try:
+        p = save(request.files['file'], 'input.docx')
+        text = extract_text_from_docx(p)
+        out = os.path.join(UPLOAD, 'converted.html')
+        lines = [f"<p>{html.escape(line.strip())}</p>" for line in text.split('\n') if line.strip()]
+        html_content = "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Converted Document</title></head><body>" + ''.join(lines) + "</body></html>"
+        with open(out, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        return send_file(out, as_attachment=True, download_name='converted.html', mimetype='text/html')
+    except Exception as e:
+        return jsonify({'error': f'Word to HTML failed: {str(e)}'}), 500
+
+@app.route('/csv-to-json', methods=['POST'])
+def csv_to_json():
+    try:
+        p = save(request.files['file'], 'input.csv')
+        out = os.path.join(UPLOAD, 'converted.json')
+        with open(p, 'r', encoding='utf-8', errors='ignore', newline='') as f:
+            reader = csv.DictReader(f)
+            data = list(reader)
+        with open(out, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return send_file(out, as_attachment=True, download_name='converted.json', mimetype='application/json')
+    except Exception as e:
+        return jsonify({'error': f'CSV to JSON failed: {str(e)}'}), 500
+
+@app.route('/json-to-csv', methods=['POST'])
+def json_to_csv():
+    try:
+        p = save(request.files['file'], 'input.json')
+        out = os.path.join(UPLOAD, 'converted.csv')
+        with open(p, 'r', encoding='utf-8', errors='ignore') as f:
+            data = json.load(f)
+
+        if isinstance(data, dict):
+            rows = [data]
+        elif isinstance(data, list):
+            rows = data
+        else:
+            rows = [{'value': data}]
+
+        if rows and isinstance(rows[0], dict):
+            fieldnames = sorted({k for row in rows if isinstance(row, dict) for k in row.keys()})
+            with open(out, 'w', encoding='utf-8', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                for row in rows:
+                    writer.writerow(row if isinstance(row, dict) else {'value': row})
+        else:
+            with open(out, 'w', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['value'])
+                for row in rows:
+                    writer.writerow([row])
+
+        return send_file(out, as_attachment=True, download_name='converted.csv', mimetype='text/csv')
+    except Exception as e:
+        return jsonify({'error': f'JSON to CSV failed: {str(e)}'}), 500
+
+@app.route('/json-formatter', methods=['POST'])
+def json_formatter():
+    try:
+        p = save(request.files['file'], 'input.json')
+        mode = request.form.get('mode', 'pretty')
+        out = os.path.join(UPLOAD, 'formatted.json')
+        with open(p, 'r', encoding='utf-8', errors='ignore') as f:
+            payload = json.load(f)
+
+        formatted = json.dumps(payload, ensure_ascii=False, indent=(None if mode == 'minify' else 2))
+        with open(out, 'w', encoding='utf-8') as f:
+            f.write(formatted)
+        return send_file(out, as_attachment=True, download_name='formatted.json', mimetype='application/json')
+    except Exception as e:
+        return jsonify({'error': f'JSON Formatter failed: {str(e)}'}), 500
+
 # ─────────────────────────────────────────
 #  PDF TOOLS
 # ─────────────────────────────────────────
@@ -838,6 +948,22 @@ def compress_image():
     out     = os.path.join(UPLOAD,'compressed.jpg')
     img.save(out,'JPEG', quality=quality)
     return send_file(out, as_attachment=True, download_name='compressed.jpg')
+
+@app.route('/flip-image', methods=['POST'])
+def flip_image():
+    try:
+        p = save(request.files['file'], 'input_flip_image')
+        direction = request.form.get('direction', 'horizontal')
+        img = Image.open(p)
+        out = os.path.join(UPLOAD, 'flipped.png')
+        if direction == 'vertical':
+            img = img.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        img.save(out, 'PNG')
+        return send_file(out, as_attachment=True, download_name='flipped.png')
+    except Exception as e:
+        return jsonify({'error': f'Flip Image failed: {str(e)}'}), 500
 
 @app.route('/download-resume/<filename>')
 def download_resume(filename):
