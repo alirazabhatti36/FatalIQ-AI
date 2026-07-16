@@ -52,7 +52,7 @@ def is_windows_runtime():
 
 def windows_only_response(feature_name):
     return jsonify({
-        'error': f'{feature_name} is available only on a Windows server. For Railway/Linux deployment, use the PDF, OCR, ATS, and browser-safe converters instead.'
+        'error': f'{feature_name} is available only on a Windows server. For Render/Linux deployment, use the PDF, OCR, ATS, and browser-safe converters instead.'
     }), 501
 
 def extract_text_from_docx(path):

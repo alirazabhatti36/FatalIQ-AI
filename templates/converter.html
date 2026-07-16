@@ -381,16 +381,7 @@
     </footer>
 
     <script>
-        const DEFAULT_BACKEND_BASE_URL = 'https://web-production-8b35f.up.railway.app';
-
-        function resolveBackendBaseUrl() {
-            if (window.location.hostname.endsWith('.onrender.com')) {
-                return window.location.origin;
-            }
-            return DEFAULT_BACKEND_BASE_URL;
-        }
-
-        const BACKEND_BASE_URL = resolveBackendBaseUrl();
+        const BACKEND_BASE_URL = window.location.origin;
 
         document.querySelectorAll('form[action^="/"]').forEach(form => {
             const originalPath = form.getAttribute('action');
