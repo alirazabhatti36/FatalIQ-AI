@@ -310,15 +310,97 @@ def render_docx_text_to_pdf(docx_path, output_pdf_path):
     canvas.save()
 
 def score_resume_against_job_description(resume_text, job_desc):
-    resume_words = set(normalize_ats_text(resume_text))
+    resume_tokens = normalize_ats_text(resume_text)
+    resume_words = set(resume_tokens)
+    resume_token_count = len(resume_tokens)
     job_words = normalize_ats_text(job_desc)
     job_keywords = list(dict.fromkeys(job_words))
+
     if not job_keywords:
-        return 0, [], []
+        return {
+            'score': 0,
+            'matched': [],
+            'missing': [],
+            'matched_count': 0,
+            'missing_count': 0,
+            'total_keywords': 0,
+            'density': 0,
+            'grade': 'N/A',
+            'strength': {
+                'keyword_match': 0,
+                'coverage': 0,
+                'keyword_density': 0,
+            },
+            'keyword_freq': {},
+            'report': {
+                'headline': 'Add a job description to begin keyword matching.',
+                'summary': 'No target job description keywords were found to analyze.',
+                'matched_ratio': '0 / 0 keywords matched',
+                'top_missing': [],
+            },
+            'suggestions': [],
+        }
+
     matched = [word for word in job_keywords if word in resume_words]
     missing = [word for word in job_keywords if word not in resume_words]
     score = round((len(matched) / len(job_keywords)) * 100)
-    return score, matched, missing
+
+    matched_occurrences = sum(resume_tokens.count(word) for word in matched)
+    density = round((matched_occurrences / max(resume_token_count, 1)) * 100)
+    keyword_match = score
+    coverage = keyword_match
+    keyword_density = min(100, density * 4)
+    keyword_freq = {word: job_words.count(word) for word in job_keywords}
+
+    if score >= 80:
+        grade = 'A'
+        headline = 'Excellent keyword alignment'
+    elif score >= 65:
+        grade = 'B'
+        headline = 'Strong overall alignment'
+    elif score >= 50:
+        grade = 'C'
+        headline = 'Average keyword alignment'
+    elif score >= 35:
+        grade = 'D'
+        headline = 'Weak keyword alignment'
+    else:
+        grade = 'F'
+        headline = 'Low keyword alignment'
+
+    suggestions = []
+    if missing:
+        suggestions.append(f"Add these missing terms naturally: {', '.join(missing[:5])}")
+    if density < 8:
+        suggestions.append('Increase relevant keyword presence in the summary, skills, and experience sections.')
+    if len(matched) < max(3, min(6, len(job_keywords))):
+        suggestions.append('Mirror the job description language more closely in role-specific achievements and responsibilities.')
+    if not suggestions:
+        suggestions.append('Keep the current keyword coverage and focus on quantified achievements plus ATS-friendly formatting.')
+
+    return {
+        'score': score,
+        'matched': matched,
+        'missing': missing,
+        'matched_count': len(matched),
+        'missing_count': len(missing),
+        'total_keywords': len(job_keywords),
+        'density': density,
+        'grade': grade,
+        'strength': {
+            'keyword_match': keyword_match,
+            'coverage': coverage,
+            'keyword_density': keyword_density,
+        },
+        'keyword_freq': keyword_freq,
+        'report': {
+            'headline': headline,
+            'summary': f"Matched {len(matched)} of {len(job_keywords)} target keywords from the job description.",
+            'matched_ratio': f"{len(matched)} / {len(job_keywords)} keywords matched",
+            'top_missing': missing[:5],
+        },
+        'suggestions': suggestions,
+    }
 
 # ─────────────────────────────────────────
 #  PAGES (MAIN)
@@ -1137,8 +1219,9 @@ def ats_score():
 
     try:
         resume_text = extract_text_from_supported_file(path, ext)
-        score, matched, missing = score_resume_against_job_description(resume_text, job_desc)
-        return jsonify({'score': score, 'matched': matched, 'missing': missing, 'filename': filename})
+        analysis = score_resume_against_job_description(resume_text, job_desc)
+        analysis['filename'] = filename
+        return jsonify(analysis)
     except Exception as e:
         return jsonify({'error': str(e), 'filename': filename}), 500
 

@@ -347,6 +347,20 @@
     /* ── SECTION CARD ── */
     .s-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
     .s-card h4 { font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 12px; }
+    .report-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .report-pill {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .report-pill strong { display: block; font-size: 18px; color: #182033; }
+    .report-pill span { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); }
 
     /* ── STRENGTH BARS ── */
     .str-row { margin-bottom: 10px; }
@@ -584,6 +598,12 @@
           <div class="metric"><div class="num" id="mGrade"   style="color:var(--amber)">–</div><div class="lbl">Grade</div></div>
         </div>
 
+          <div class="report-summary">
+            <div class="report-pill"><strong id="matchedRatio">0 / 0</strong><span>Job description keywords matched</span></div>
+            <div class="report-pill"><strong id="reportHeadline">Waiting</strong><span>Fit headline</span></div>
+            <div class="report-pill"><strong id="resumeFileLabel">No file</strong><span>Resume analyzed</span></div>
+          </div>
+
         <!-- Strength + Frequency -->
         <div class="two-col">
           <div class="s-card">
@@ -719,6 +739,9 @@
       document.getElementById('mMissing').textContent = data.missing.length;
       document.getElementById('mDensity').textContent = (data.density || 0) + '%';
       document.getElementById('mGrade').textContent   = data.grade || '–';
+      document.getElementById('matchedRatio').textContent = data.report?.matched_ratio || `${data.matched.length} / ${data.total_keywords || 0}`;
+      document.getElementById('reportHeadline').textContent = data.report?.headline || 'Keyword report';
+      document.getElementById('resumeFileLabel').textContent = data.filename || 'Uploaded file';
 
       // strength breakdown
       const strength = data.strength || {};
@@ -760,11 +783,13 @@
           : '<span style="font-size:12px;color:var(--green)">🎉 All key keywords are present!</span>';
 
       // suggestion
-      const top5 = data.missing.slice(0, 5).join(', ');
+      const top5 = (data.report?.top_missing || data.missing.slice(0, 5)).join(', ');
+      const suggestionLines = Array.isArray(data.suggestions) && data.suggestions.length
+        ? `<ul style="padding-left:18px; margin:0;">${data.suggestions.map(item => `<li>${item}</li>`).join('')}</ul>`
+        : '';
       const tip  = data.missing.length
-        ? `Your resume is missing <strong>${data.missing.length}</strong> keywords. ` +
-          `Most important missing terms: <strong>${top5}</strong>. ` +
-          `Add them naturally to your skills, experience, or summary sections.`
+        ? `<strong>${data.report?.summary || `Matched ${data.matched.length} of ${data.total_keywords || 0} keywords.`}</strong><br>` +
+          `Most important missing terms: <strong>${top5 || 'None'}</strong>.${suggestionLines ? `<div style="margin-top:8px;">${suggestionLines}</div>` : ''}`
         : '🎉 Great work! Your resume already includes all key terms. ' +
           'Now focus on quantifying achievements and keeping the formatting ATS-friendly.';
       document.getElementById('suggestionBox').innerHTML = tip;

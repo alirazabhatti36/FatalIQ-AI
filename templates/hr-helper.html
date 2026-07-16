@@ -170,6 +170,17 @@
         
         .progress-bar { background: #e2e8f0; border-radius: 999px; height: 6px; overflow: hidden; margin: 0.5rem 0; }
         .progress-fill { height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 999px; width: 0%; transition: width 0.8s ease; }
+        .report-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem; margin-top: 1rem; }
+        .report-card { background: #f8fafc; border: 1px solid rgba(226,232,240,0.8); border-radius: 16px; padding: 0.95rem 1rem; }
+        .report-card strong { display: block; font-size: 1.1rem; color: #1e293b; }
+        .report-card span { display: block; margin-top: 0.25rem; font-size: 0.78rem; color: #64748b; }
+        .report-card em { display: block; margin-top: 0.4rem; font-size: 0.72rem; color: #475569; font-style: normal; line-height: 1.45; }
+        .detail-section { margin-top: 0.9rem; }
+        .detail-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.45rem; }
+        .detail-tag { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+        .detail-tag.matched { background: #d1fae5; color: #065f46; }
+        .detail-tag.missing { background: #fee2e2; color: #991b1b; }
+        .detail-tag.neutral { background: #eef2ff; color: #4338ca; }
         
         /* Bulk Actions */
         .bulk-actions { background: #eef2ff; border-radius: 14px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; display: none; align-items: center; gap: 1rem; flex-wrap: wrap; border: 1px solid #c7d2fe; }
@@ -318,6 +329,13 @@
             <div style="margin-top:0.85rem; padding:0.85rem 1rem; border-radius:14px; background:linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)); border:1px solid rgba(102,126,234,0.12); color:#475569; font-size:0.85rem; line-height:1.55;">
                 <strong style="color:#1e293b;">Current focus:</strong>
                 <span id="rolePreview">Select a job title and paste a description to start screening.</span>
+            </div>
+
+            <div class="report-grid" id="keywordReportGrid">
+                <div class="report-card"><strong id="reportKeywords">0</strong><span>Target keywords</span><em>Unique terms extracted from the job description.</em></div>
+                <div class="report-card"><strong id="reportAverage">0%</strong><span>Average match score</span><em>Average file-to-description fit across processed resumes.</em></div>
+                <div class="report-card"><strong id="reportBest">0%</strong><span>Best file score</span><em>Highest observed score from the uploaded resumes.</em></div>
+                <div class="report-card"><strong id="reportFocus">Waiting</strong><span>Current report</span><em id="reportFocusCopy">Upload resumes and add a job description to generate a match report.</em></div>
             </div>
 
             <div class="progress-bar" id="progressBar" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
@@ -546,12 +564,63 @@
         }
 
         function analyzeResumeAgainstDescription(resumeText, jobDesc) {
-            const resumeWords = new Set((resumeText || '').toLowerCase().match(/[a-z0-9+.#-]{2,}/g) || []);
+            const resumeTokens = ((resumeText || '').toLowerCase().match(/[a-z0-9+.#-]{2,}/g) || []).filter(word => word.length > 2 && !stopWords.has(word));
+            const resumeWords = new Set(resumeTokens);
             const keywords = extractKeywords(jobDesc);
             const matched = keywords.filter(word => resumeWords.has(word));
             const missing = keywords.filter(word => !resumeWords.has(word));
             const score = keywords.length ? Math.round((matched.length / keywords.length) * 100) : 0;
-            return { score, matched, missing };
+            const matchedOccurrences = matched.reduce((sum, word) => sum + resumeTokens.filter(token => token === word).length, 0);
+            const density = Math.round((matchedOccurrences / Math.max(resumeTokens.length, 1)) * 100);
+            const keywordDensity = Math.min(100, density * 4);
+            const keywordFreq = Object.fromEntries(keywords.map(word => [word, keywords.filter(token => token === word).length || 1]));
+            const grade = score >= 80 ? 'A' : score >= 65 ? 'B' : score >= 50 ? 'C' : score >= 35 ? 'D' : 'F';
+            const headline = score >= 80 ? 'Excellent match' : score >= 65 ? 'Strong match' : score >= 50 ? 'Average match' : score >= 35 ? 'Weak match' : 'Low match';
+            const suggestions = [];
+            if (missing.length) suggestions.push(`Missing terms: ${missing.slice(0, 5).join(', ')}`);
+            if (density < 8) suggestions.push('Low keyword density. Add role-specific terms to the summary and experience bullets.');
+            if (!suggestions.length) suggestions.push('Good alignment. Validate achievements and keep formatting ATS-friendly.');
+            return {
+                score,
+                matched,
+                missing,
+                matched_count: matched.length,
+                missing_count: missing.length,
+                total_keywords: keywords.length,
+                density,
+                grade,
+                keyword_freq: keywordFreq,
+                strength: {
+                    keyword_match: score,
+                    coverage: score,
+                    keyword_density: keywordDensity
+                },
+                report: {
+                    headline,
+                    summary: `Matched ${matched.length} of ${keywords.length} keywords from the job description.`,
+                    matched_ratio: `${matched.length} / ${keywords.length}`,
+                    top_missing: missing.slice(0, 5)
+                },
+                suggestions
+            };
+        }
+
+        function updateKeywordReport(jobDesc, results = []) {
+            const keywords = extractKeywords(jobDesc);
+            const average = results.length ? Math.round(results.reduce((sum, item) => sum + item.score, 0) / results.length) : 0;
+            const best = results.length ? Math.max(...results.map(item => item.score)) : 0;
+            const reportHeadline = results.length
+                ? `${results.filter(item => item.score >= 60).length} strong matches`
+                : 'Waiting';
+            const focusCopy = results.length
+                ? `Processed ${results.length} resume(s) against ${keywords.length} unique job description keywords.`
+                : 'Upload resumes and add a job description to generate a match report.';
+
+            document.getElementById('reportKeywords').textContent = keywords.length;
+            document.getElementById('reportAverage').textContent = `${average}%`;
+            document.getElementById('reportBest').textContent = `${best}%`;
+            document.getElementById('reportFocus').textContent = reportHeadline;
+            document.getElementById('reportFocusCopy').textContent = focusCopy;
         }
 
         async function extractResumeText(file) {
@@ -656,6 +725,15 @@
                 score: analysis.score,
                 matched: analysis.matched,
                 missing: analysis.missing,
+                matched_count: analysis.matched_count,
+                missing_count: analysis.missing_count,
+                total_keywords: analysis.total_keywords,
+                density: analysis.density,
+                grade: analysis.grade,
+                keyword_freq: analysis.keyword_freq,
+                strength: analysis.strength,
+                report: analysis.report,
+                suggestions: analysis.suggestions,
                 status: candidateStatus[file.name] || 'pending',
                 notes: candidateNotes[file.name] || '',
                 file: file,
@@ -741,6 +819,7 @@
             updateScanControls();
             document.getElementById('progressBar').style.display = 'none';
             document.getElementById('processingInfo').style.display = 'none';
+            updateKeywordReport(jobDesc, bulkResults);
             renderStatsAndCharts();
             renderTable();
             document.getElementById('resultsDiv').style.display = 'block';
@@ -820,8 +899,8 @@
                     <tr>
                         <td><input type="checkbox" class="checkbox" data-id="${r.id}" ${isChecked ? 'checked' : ''} onchange="toggleCandidate(${r.id})"></td>
                         <td>${idx+1}</td>
-                        <td style="cursor:pointer; color:#667eea; font-weight:500;" onclick="showCandidateDetail(${r.id})">📄 ${r.name}<div style="font-size:0.7rem; color:#94a3b8; margin-top:0.15rem;">${r.title || getSelectedJobTitle()}</div></td>
-                        <td><span class="score-badge ${scoreClass}">${r.score}%</span></td>
+                        <td style="cursor:pointer; color:#667eea; font-weight:500;" onclick="showCandidateDetail(${r.id})">📄 ${r.name}<div style="font-size:0.7rem; color:#94a3b8; margin-top:0.15rem;">${r.title || getSelectedJobTitle()}</div><div style="font-size:0.7rem; color:#64748b; margin-top:0.15rem;">${r.report?.matched_ratio || `${r.matched.length} / ${r.total_keywords || 0}`} matched</div></td>
+                        <td><span class="score-badge ${scoreClass}">${r.score}%</span><div style="font-size:0.68rem; color:#94a3b8; margin-top:0.15rem;">Grade ${r.grade || '–'} • ${r.density || 0}% density</div></td>
                         <td>${r.matched.length}</td>
                         <td>${r.missing.length}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -887,8 +966,11 @@
                 <div><strong>📄 File:</strong> ${candidate.name}</div>
                 <div><strong>💼 Job Title:</strong> ${candidate.title || getSelectedJobTitle()}</div>
                 <div><strong>🎯 Score:</strong> ${candidate.score}%</div>
-                <div><strong>✅ Matched Keywords (${candidate.matched.length}):</strong> ${candidate.matched.slice(0,15).join(', ') || 'None'}</div>
-                <div><strong>❌ Missing Keywords (${candidate.missing.length}):</strong> ${candidate.missing.slice(0,15).join(', ') || 'None'}</div>
+                <div><strong>📊 Report:</strong> ${candidate.report?.headline || 'Keyword report'} • ${candidate.report?.matched_ratio || `${candidate.matched.length} / ${candidate.total_keywords || 0}`} matched • Grade ${candidate.grade || '–'}</div>
+                <div><strong>🧪 Density:</strong> ${candidate.density || 0}% keyword density in extracted resume text</div>
+                <div class="detail-section"><strong>✅ Matched Keywords (${candidate.matched.length})</strong><div class="detail-tags">${candidate.matched.length ? candidate.matched.slice(0, 20).map(word => `<span class="detail-tag matched">${word}</span>`).join('') : '<span class="detail-tag neutral">No matched terms</span>'}</div></div>
+                <div class="detail-section"><strong>❌ Missing Keywords (${candidate.missing.length})</strong><div class="detail-tags">${candidate.missing.length ? candidate.missing.slice(0, 20).map(word => `<span class="detail-tag missing">${word}</span>`).join('') : '<span class="detail-tag neutral">No missing terms</span>'}</div></div>
+                <div class="detail-section"><strong>💡 Suggestions</strong><div class="detail-tags">${(candidate.suggestions || []).map(item => `<span class="detail-tag neutral">${item}</span>`).join('') || '<span class="detail-tag neutral">No suggestions</span>'}</div></div>
                 <div style="margin-top:0.5rem;"><strong>📄 Resume Preview:</strong></div>
                 <div style="background:#f1f5f9; padding:0.5rem; border-radius:8px; max-height:200px; overflow-y:auto; font-size:0.75rem;">${resumeText.replace(/\n/g, '<br>')}</div>
                 <div style="margin-top:0.5rem;"><strong>⭐ Status:</strong> 
@@ -933,8 +1015,8 @@
         }
         
         function downloadCSV() {
-            let csv = "Name,Score,Matched Count,Missing Count,Status,Notes\n";
-            bulkResults.forEach(r => { csv += `"${r.name}",${r.score}%,${r.matched.length},${r.missing.length},"${r.status}","${(r.notes || '').replace(/"/g, '""')}"\n`; });
+            let csv = "Name,Score,Grade,Matched Count,Missing Count,Total Keywords,Density,Status,Notes\n";
+            bulkResults.forEach(r => { csv += `"${r.name}",${r.score}%,${r.grade || ''},${r.matched.length},${r.missing.length},${r.total_keywords || 0},${r.density || 0}%,"${r.status}","${(r.notes || '').replace(/"/g, '""')}"\n`; });
             const blob = new Blob([csv], {type: 'text/csv'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -948,6 +1030,7 @@
         csvBtn.innerHTML = '⬇️ CSV';
         csvBtn.onclick = downloadCSV;
         document.querySelector('.filter-row').appendChild(csvBtn);
+        updateKeywordReport(document.getElementById('jobDesc').value.trim(), []);
     </script>
 </body>
 </html>
