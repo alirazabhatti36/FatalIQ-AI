@@ -1,6 +1,5 @@
 from flask import Flask, request, send_file, send_from_directory, render_template, jsonify, redirect, abort, make_response
 from PIL import Image
-import pytesseract
 import os, re, io, zipfile, shutil
 import json
 import tempfile
@@ -14,16 +13,21 @@ import xml.etree.ElementTree as ET
 # --- LinkedIn Optimizer import HATAYA ---
 # from linkedin_optimizer import analyze_linkedin_profile, fetch_profile_from_url
 
-# Tesseract path (Sirf Image OCR ke liye, agar Render pe nahi hai toh error dega)
+# Tesseract path (lazy-loaded only when ATS image OCR is needed)
 WINDOWS_TESSERACT_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-if os.name == 'nt' and os.path.exists(WINDOWS_TESSERACT_PATH):
-    pytesseract.pytesseract.tesseract_cmd = WINDOWS_TESSERACT_PATH
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+app.config.update(
+    MAX_CONTENT_LENGTH=int(os.getenv('MAX_CONTENT_LENGTH', str(20 * 1024 * 1024))),
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_REFRESH_EACH_REQUEST=False,
+)
 UPLOAD = 'uploads'
 os.makedirs(UPLOAD, exist_ok=True)
-UPLOAD_RETENTION_SECONDS = int(os.getenv('UPLOAD_RETENTION_SECONDS', '900'))
+UPLOAD_RETENTION_SECONDS = int(os.getenv('UPLOAD_RETENTION_SECONDS', '120'))
 
 def purge_uploads(force=False, max_age_seconds=UPLOAD_RETENTION_SECONDS):
     now = time.time()
@@ -133,15 +137,9 @@ def normalize_ats_text(text):
 
 def extract_text_from_image(path):
     try:
-        try:
-            easyocr = importlib.import_module('easyocr')
-            reader = easyocr.Reader(['en'])
-            result = reader.readtext(path, detail=0)
-            if result:
-                return ' '.join(result)
-        except Exception:
-            pass
-
+        pytesseract = importlib.import_module('pytesseract')
+        if os.name == 'nt' and os.path.exists(WINDOWS_TESSERACT_PATH):
+            pytesseract.pytesseract.tesseract_cmd = WINDOWS_TESSERACT_PATH
         return pytesseract.image_to_string(Image.open(path))
     except Exception:
         return ''
@@ -1032,60 +1030,22 @@ def image_to_pdf():
 # ─────────────────────────────────────────
 #  IMAGE TO WORD - Using EasyOCR (No Tesseract needed)
 # ─────────────────────────────────────────
+def browser_only_conversion_response(tool_name):
+    return jsonify({
+        'error': f'{tool_name} now runs in the browser to reduce Render memory usage. Open the converter page with JavaScript enabled.'
+    }), 410
+
 @app.route('/image-to-word', methods=['POST'])
 def image_to_word():
-    try:
-        easyocr = importlib.import_module('easyocr')
-        docx = importlib.import_module('docx')
-        p = save(request.files['file'], 'input_img.png')
-        reader = easyocr.Reader(['en'])
-        result = reader.readtext(p)
-        text = ' '.join([item[1] for item in result])
-        
-        d = docx.Document()
-        d.add_heading('Extracted Text', 0)
-        for line in text.split('\n'):
-            if line.strip():
-                d.add_paragraph(line.strip())
-        out = os.path.join(UPLOAD, 'output.docx')
-        d.save(out)
-        return send_file(out, as_attachment=True, download_name='converted.docx')
-    except Exception as e:
-        return jsonify({'error': f'OCR to Word failed: {str(e)}. Try: pip install easyocr'}), 500
+    return browser_only_conversion_response('Image to Word')
 
 @app.route('/image-to-excel', methods=['POST'])
 def image_to_excel():
-    try:
-        easyocr = importlib.import_module('easyocr')
-        pd = importlib.import_module('pandas')
-        p = save(request.files['file'], 'input_img.png')
-        reader = easyocr.Reader(['en'])
-        result = reader.readtext(p)
-        text = ' '.join([item[1] for item in result])
-        
-        lines = [l.strip() for l in text.split('\n') if l.strip()]
-        rows = [re.split(r'\t|  {2,}', l) for l in lines]
-        out = os.path.join(UPLOAD, 'output.xlsx')
-        pd.DataFrame(rows).to_excel(out, index=False, header=False)
-        return send_file(out, as_attachment=True, download_name='converted.xlsx')
-    except Exception as e:
-        return jsonify({'error': f'OCR to Excel failed: {str(e)}. Try: pip install easyocr'}), 500
+    return browser_only_conversion_response('Image to Excel')
 
 @app.route('/ocr-to-text', methods=['POST'])
 def ocr_to_text():
-    try:
-        easyocr = importlib.import_module('easyocr')
-        p = save(request.files['file'], 'input_img.png')
-        reader = easyocr.Reader(['en'])
-        result = reader.readtext(p)
-        text = ' '.join([item[1] for item in result])
-        
-        out = os.path.join(UPLOAD, 'ocr_output.txt')
-        with open(out, 'w', encoding='utf-8') as f:
-            f.write(text)
-        return send_file(out, as_attachment=True, download_name='ocr_text.txt')
-    except Exception as e:
-        return jsonify({'error': f'OCR to Text failed: {str(e)}. Try: pip install easyocr'}), 500
+    return browser_only_conversion_response('OCR to Text')
 
 @app.route('/jpg-to-png', methods=['POST'])
 def jpg_to_png():
