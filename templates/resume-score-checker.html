@@ -109,10 +109,15 @@
       min-height: 100vh;
     }
 
-    .page-shell { max-width: 1180px; margin: 0 auto; }
+    .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); padding: 0.8rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(102,126,234,0.1); }
+    .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; letter-spacing: -0.5px; }
+    .nav-links { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.3s; font-size: 0.9rem; }
+    .nav-links a:hover { background: #f0f4ff; color: #667eea; }
+    .nav-links a.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
 
-    a.back { display: inline-flex; align-items: center; gap: 5px; color: var(--purple); text-decoration: none; font-size: 13px; margin-bottom: 22px; opacity: .85; }
-    a.back:hover { opacity: 1; }
+    .page-shell { max-width: 1180px; margin: 0 auto; }
 
     .hero {
       position: relative;
@@ -487,8 +492,26 @@
     <script defer src="/tracking-consent.js" data-adsense-client="ca-pub-1373118680696037" data-ga-measurement-id="G-06PT7VHV1Q"></script>
 </head>
 <body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo">AuraToolkit360</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/templates/converter.html">Converter</a>
+        <a href="/templates/resume-cv-maker.html">Resume CV Maker</a>
+        <a href="/templates/resume-score-checker.html" class="active">Resume CV Score Checker</a>
+        <a href="/templates/hr-helper.html">HR Helper</a>
+        <a href="/templates/about.html">About</a>
+        <a href="/templates/blogs.html">Blogs</a>
+        <a href="/templates/contact.html">Contact</a>
+        <a href="/templates/privacy-policy.html">Privacy</a>
+        <a href="/templates/terms.html">Terms</a>
+        <a href="/templates/disclaimer.html">Disclaimer</a>
+      </div>
+    </div>
+  </nav>
+
   <main class="page-shell">
-    <a class="back" href="/templates/resume-cv-maker.html">← Resume CV Maker</a>
 
     <section class="hero" aria-labelledby="page-title">
       <div class="hero-grid">
@@ -662,6 +685,36 @@
       </article>
     </section>
   </main>
+
+  <footer style="margin-top:2rem; background:#ffffff; border-top:1px solid #e2e8f0; box-shadow:0 -4px 20px rgba(0,0,0,0.04);">
+    <div style="max-width:1400px; margin:0 auto; padding:1.5rem 1rem; display:flex; flex-wrap:wrap; gap:1.2rem; align-items:flex-start;">
+      <div style="flex:1 1 280px; color:#475569;">
+        <h3 style="font-size:1rem; margin-bottom:0.45rem; color:#1e293b;">AuraToolkit360</h3>
+        <p style="font-size:0.85rem; line-height:1.6;">Check resume fit, compare job description keywords, and improve ATS alignment with practical guidance.</p>
+        <p style="font-size:0.8rem; margin-top:0.5rem;"><strong>Email:</strong> info@auratoolkit360.com</p>
+      </div>
+      <div style="flex:1 1 220px; color:#475569;">
+        <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Quick Links</h4>
+        <div style="display:grid; gap:0.35rem; font-size:0.82rem;">
+          <a href="/templates/index.html" style="color:#475569; text-decoration:none;">Home</a>
+          <a href="/templates/converter.html" style="color:#475569; text-decoration:none;">Converter</a>
+          <a href="/templates/resume-cv-maker.html" style="color:#475569; text-decoration:none;">Resume CV Maker</a>
+          <a href="/templates/resume-score-checker.html" style="color:#475569; text-decoration:none;">Score Checker</a>
+          <a href="/templates/hr-helper.html" style="color:#475569; text-decoration:none;">HR Helper</a>
+        </div>
+      </div>
+      <div style="flex:1 1 320px; color:#475569;">
+        <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Feedback</h4>
+        <form onsubmit="event.preventDefault(); const fd=new FormData(this); const body='Name: '+fd.get('name')+'\nEmail: '+fd.get('email')+'\n\nFeedback:\n'+fd.get('message'); window.location.href='mailto:info@auratoolkit360.com?subject='+encodeURIComponent('AuraToolkit360 Feedback')+'&body='+encodeURIComponent(body); this.reset(); alert('Thanks! Your email client is opening.');">
+          <input name="name" type="text" placeholder="Your name" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+          <input name="email" type="email" placeholder="Your email" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+          <textarea name="message" rows="3" placeholder="Share your feedback..." required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; resize:vertical; margin-bottom:0.5rem;"></textarea>
+          <button type="submit" style="background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:10px; padding:0.45rem 0.9rem; font-size:0.8rem; cursor:pointer;">Send Feedback</button>
+        </form>
+      </div>
+    </div>
+    <div style="border-top:1px solid #e2e8f0; text-align:center; padding:0.75rem; font-size:0.75rem; color:#64748b;">© 2026 AuraToolkit360. All rights reserved.</div>
+  </footer>
 
 
   <script>

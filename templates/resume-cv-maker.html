@@ -27,12 +27,13 @@
             --muted: #64748b;
         }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f3f6fb; color: #1e293b; }
-        .navbar { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0.8rem 1rem; position: sticky; top: 0; z-index: 30; }
-        .nav-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
-        .logo { font-weight: 800; color: #1d4ed8; text-decoration: none; }
-        .nav-links { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-        .nav-links a { text-decoration: none; color: #334155; font-size: 0.85rem; padding: 0.4rem 0.7rem; border-radius: 8px; }
-        .nav-links a.active, .nav-links a:hover { background: #dbeafe; color: #1d4ed8; }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); padding: 0.8rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(102,126,234,0.1); }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.3s; }
+        .nav-links a:hover { background: #f0f4ff; color: #667eea; }
+        .nav-links a.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
         .container { max-width: 1300px; margin: 0 auto; padding: 1rem; }
         .hero { background: linear-gradient(135deg, #0f172a, #1d4ed8); color: #ffffff; border-radius: 14px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
         .hero h1 { font-size: 1.35rem; }
@@ -167,14 +168,20 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-inner">
+        <div class="nav-container">
             <a class="logo" href="/">AuraToolkit360</a>
             <div class="nav-links">
-                <a href="/templates/index.html">Home</a>
+                <a href="/">Home</a>
                 <a href="/templates/converter.html">Converter</a>
                 <a href="/templates/resume-cv-maker.html" class="active">Resume CV Maker</a>
                 <a href="/templates/resume-score-checker.html">Resume CV Score Checker</a>
                 <a href="/templates/hr-helper.html">HR Helper</a>
+                <a href="/templates/about.html">About</a>
+                <a href="/templates/blogs.html">Blogs</a>
+                <a href="/templates/contact.html">Contact</a>
+                <a href="/templates/privacy-policy.html">Privacy</a>
+                <a href="/templates/terms.html">Terms</a>
+                <a href="/templates/disclaimer.html">Disclaimer</a>
             </div>
         </div>
     </nav>
@@ -258,6 +265,36 @@
             </div>
         </div>
     </div>
+
+    <footer style="margin-top:2rem; background:#ffffff; border-top:1px solid #e2e8f0; box-shadow:0 -4px 20px rgba(0,0,0,0.04);">
+        <div style="max-width:1400px; margin:0 auto; padding:1.5rem 1rem; display:flex; flex-wrap:wrap; gap:1.2rem; align-items:flex-start;">
+            <div style="flex:1 1 280px; color:#475569;">
+                <h3 style="font-size:1rem; margin-bottom:0.45rem; color:#1e293b;">AuraToolkit360</h3>
+                <p style="font-size:0.85rem; line-height:1.6;">Build polished resumes, test ATS compatibility, and move faster through job applications.</p>
+                <p style="font-size:0.8rem; margin-top:0.5rem;"><strong>Email:</strong> info@auratoolkit360.com</p>
+            </div>
+            <div style="flex:1 1 220px; color:#475569;">
+                <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Quick Links</h4>
+                <div style="display:grid; gap:0.35rem; font-size:0.82rem;">
+                    <a href="/templates/index.html" style="color:#475569; text-decoration:none;">Home</a>
+                    <a href="/templates/converter.html" style="color:#475569; text-decoration:none;">Converter</a>
+                    <a href="/templates/resume-cv-maker.html" style="color:#475569; text-decoration:none;">Resume CV Maker</a>
+                    <a href="/templates/resume-score-checker.html" style="color:#475569; text-decoration:none;">Score Checker</a>
+                    <a href="/templates/hr-helper.html" style="color:#475569; text-decoration:none;">HR Helper</a>
+                </div>
+            </div>
+            <div style="flex:1 1 320px; color:#475569;">
+                <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Feedback</h4>
+                <form onsubmit="event.preventDefault(); const fd=new FormData(this); const body='Name: '+fd.get('name')+'\nEmail: '+fd.get('email')+'\n\nFeedback:\n'+fd.get('message'); window.location.href='mailto:info@auratoolkit360.com?subject='+encodeURIComponent('AuraToolkit360 Feedback')+'&body='+encodeURIComponent(body); this.reset(); alert('Thanks! Your email client is opening.');">
+                    <input name="name" type="text" placeholder="Your name" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+                    <input name="email" type="email" placeholder="Your email" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+                    <textarea name="message" rows="3" placeholder="Share your feedback..." required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; resize:vertical; margin-bottom:0.5rem;"></textarea>
+                    <button type="submit" style="background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:10px; padding:0.45rem 0.9rem; font-size:0.8rem; cursor:pointer;">Send Feedback</button>
+                </form>
+            </div>
+        </div>
+        <div style="border-top:1px solid #e2e8f0; text-align:center; padding:0.75rem; font-size:0.75rem; color:#64748b;">© 2026 AuraToolkit360. All rights reserved.</div>
+    </footer>
 
     <script>
         const BACKEND_BASE = 'https://auratoolkit-360.onrender.com';

@@ -39,12 +39,13 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 10px; }
         
         /* ===== NAVBAR ===== */
-        .navbar { background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); padding: 0.6rem 1rem; box-shadow: 0 2px 20px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.2); }
-        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-        .logo { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); padding: 0.8rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(102,126,234,0.1); }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; text-decoration: none; }
         .nav-links { display: flex; gap: 0.3rem; flex-wrap: wrap; }
-        .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; padding: 0.4rem 0.7rem; border-radius: 8px; transition: all 0.3s; font-size: 0.75rem; }
+        .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.3s; font-size: 0.9rem; }
         .nav-links a:hover { background: rgba(102,126,234,0.1); color: #667eea; }
+        .nav-links a.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
         
         /* ===== HERO ===== */
         .hero { text-align: center; padding: 2rem 1rem 1.5rem; color: white; }
@@ -102,14 +103,6 @@
         .stat-number { font-size: 2rem; font-weight: 800; }
         .stat-label { font-size: 0.75rem; opacity: 0.8; }
         
-        /* ===== FOOTER ===== */
-        .footer { background: rgba(0,0,0,0.12); backdrop-filter: blur(12px); padding: 1.5rem 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.06); }
-        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .footer-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-        .footer-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.7rem; transition: color 0.3s; }
-        .footer-links a:hover { color: white; }
-        .footer-copy { color: rgba(255,255,255,0.5); font-size: 0.65rem; text-align: center; }
-
         @media (max-width: 900px) {
             .cards-container { gap: 1rem; }
             .card { max-width: 100%; }
@@ -225,9 +218,9 @@
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">AuraToolkit360</div>
+            <a href="/" class="logo">AuraToolkit360</a>
             <div class="nav-links">
-                <a href="/">Home</a>
+                <a href="/" class="active">Home</a>
                 <a href="/templates/converter.html">Converter</a>
                 <a href="/templates/resume-cv-maker.html">Resume CV Maker</a>
                 <a href="/templates/resume-score-checker.html">Score Checker</a>
@@ -443,34 +436,34 @@
     </div>
 
     <!-- ===== FOOTER ===== -->
-    <footer class="footer" style="padding:1.5rem 1rem;">
-        <div style="max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:1.2rem; align-items:flex-start;">
-            <div style="flex:1 1 280px; color:rgba(255,255,255,0.85);">
-                <h3 style="font-size:1rem; margin-bottom:0.45rem;">AuraToolkit360</h3>
-                <p style="font-size:0.82rem; line-height:1.6;">Smart toolkit for file conversions, ATS-ready resumes, and HR automation.</p>
-                <p style="font-size:0.78rem; margin-top:0.5rem;"><strong>Email:</strong> info@auratoolkit360.com</p>
+    <footer style="margin-top:2rem; background:#ffffff; border-top:1px solid #e2e8f0; box-shadow:0 -4px 20px rgba(0,0,0,0.04);">
+        <div style="max-width:1400px; margin:0 auto; padding:1.5rem 1rem; display:flex; flex-wrap:wrap; gap:1.2rem; align-items:flex-start;">
+            <div style="flex:1 1 280px; color:#475569;">
+                <h3 style="font-size:1rem; margin-bottom:0.45rem; color:#1e293b;">AuraToolkit360</h3>
+                <p style="font-size:0.85rem; line-height:1.6;">Smart toolkit for file conversions, ATS-ready resumes, and HR automation.</p>
+                <p style="font-size:0.8rem; margin-top:0.5rem;"><strong>Email:</strong> info@auratoolkit360.com</p>
             </div>
-            <div style="flex:1 1 220px; color:rgba(255,255,255,0.85);">
-                <h4 style="font-size:0.88rem; margin-bottom:0.45rem;">Quick Links</h4>
-                <div style="display:grid; gap:0.35rem; font-size:0.78rem;">
-                    <a href="/templates/about.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">About</a>
-                    <a href="/templates/blogs.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Blogs</a>
-                    <a href="/templates/contact.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Contact</a>
-                    <a href="/templates/privacy-policy.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Privacy Policy</a>
-                    <a href="/templates/terms.html" style="color:rgba(255,255,255,0.78); text-decoration:none;">Terms</a>
+            <div style="flex:1 1 220px; color:#475569;">
+                <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Quick Links</h4>
+                <div style="display:grid; gap:0.35rem; font-size:0.82rem;">
+                    <a href="/templates/index.html" style="color:#475569; text-decoration:none;">Home</a>
+                    <a href="/templates/converter.html" style="color:#475569; text-decoration:none;">Converter</a>
+                    <a href="/templates/resume-cv-maker.html" style="color:#475569; text-decoration:none;">Resume CV Maker</a>
+                    <a href="/templates/resume-score-checker.html" style="color:#475569; text-decoration:none;">Score Checker</a>
+                    <a href="/templates/hr-helper.html" style="color:#475569; text-decoration:none;">HR Helper</a>
                 </div>
             </div>
-            <div style="flex:1 1 320px; color:rgba(255,255,255,0.85);">
-                <h4 style="font-size:0.88rem; margin-bottom:0.45rem;">Feedback</h4>
+            <div style="flex:1 1 320px; color:#475569;">
+                <h4 style="font-size:0.9rem; margin-bottom:0.45rem; color:#1e293b;">Feedback</h4>
                 <form onsubmit="event.preventDefault(); const fd=new FormData(this); const body='Name: '+fd.get('name')+'\nEmail: '+fd.get('email')+'\n\nFeedback:\n'+fd.get('message'); window.location.href='mailto:info@auratoolkit360.com?subject='+encodeURIComponent('AuraToolkit360 Feedback')+'&body='+encodeURIComponent(body); this.reset(); alert('Thanks! Your email client is opening.');">
-                    <input name="name" type="text" placeholder="Your name" required style="width:100%; padding:0.45rem 0.65rem; border:1px solid rgba(255,255,255,0.25); border-radius:10px; font-size:0.78rem; margin-bottom:0.4rem; background:rgba(255,255,255,0.1); color:#fff;">
-                    <input name="email" type="email" placeholder="Your email" required style="width:100%; padding:0.45rem 0.65rem; border:1px solid rgba(255,255,255,0.25); border-radius:10px; font-size:0.78rem; margin-bottom:0.4rem; background:rgba(255,255,255,0.1); color:#fff;">
-                    <textarea name="message" rows="3" placeholder="Share your feedback..." required style="width:100%; padding:0.45rem 0.65rem; border:1px solid rgba(255,255,255,0.25); border-radius:10px; font-size:0.78rem; resize:vertical; margin-bottom:0.5rem; background:rgba(255,255,255,0.1); color:#fff;"></textarea>
-                    <button type="submit" style="background:#ffffff; color:#1a202c; border:none; border-radius:10px; padding:0.42rem 0.9rem; font-size:0.78rem; cursor:pointer; font-weight:600;">Send Feedback</button>
+                    <input name="name" type="text" placeholder="Your name" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+                    <input name="email" type="email" placeholder="Your email" required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; margin-bottom:0.4rem;">
+                    <textarea name="message" rows="3" placeholder="Share your feedback..." required style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:10px; font-size:0.8rem; resize:vertical; margin-bottom:0.5rem;"></textarea>
+                    <button type="submit" style="background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; border-radius:10px; padding:0.45rem 0.9rem; font-size:0.8rem; cursor:pointer;">Send Feedback</button>
                 </form>
             </div>
         </div>
-        <div class="footer-copy" style="margin-top:0.9rem; border-top:1px solid rgba(255,255,255,0.15); padding-top:0.75rem;">&copy; 2026 AuraToolkit360 — Empowering Your Productivity</div>
+        <div style="border-top:1px solid #e2e8f0; text-align:center; padding:0.75rem; font-size:0.75rem; color:#64748b;">© 2026 AuraToolkit360. All rights reserved.</div>
     </footer>
 </body>
 </html>
