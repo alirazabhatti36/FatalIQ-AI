@@ -39,10 +39,10 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 10px; }
         
         /* ===== NAVBAR ===== */
-        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); padding: 0.8rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(102,126,234,0.1); }
-        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); padding: 0.8rem 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(102,126,234,0.1); overflow-x: auto; }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 1rem; min-width: max-content; }
         .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.5px; text-decoration: none; }
-        .nav-links { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .nav-links { display: flex; gap: 0.3rem; flex-wrap: nowrap; align-items: center; }
         .nav-links a { text-decoration: none; color: #4a5568; font-weight: 500; padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.3s; font-size: 0.9rem; }
         .nav-links a:hover { background: rgba(102,126,234,0.1); color: #667eea; }
         .nav-links a.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
@@ -128,9 +128,9 @@
         /* MOBILE LARGE (max-width: 768px) */
         @media (max-width: 768px) {
             .navbar { padding: 0.5rem 0.8rem; }
-            .nav-container { flex-direction: column; align-items: stretch; }
+            .nav-container { flex-direction: column; align-items: stretch; min-width: 0; }
             .logo { font-size: 1.2rem; text-align: center; }
-            .nav-links { justify-content: center; }
+            .nav-links { justify-content: center; flex-wrap: wrap; }
             .nav-links a { font-size: 0.65rem; padding: 0.3rem 0.5rem; }
             
             .hero { padding: 1.5rem 0.8rem 1rem; }
