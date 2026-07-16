@@ -382,6 +382,7 @@
 
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
@@ -428,6 +429,33 @@
 
             const output = await mergedPdf.save();
             downloadBlob(new Blob([output], { type: 'application/pdf' }), 'merged.pdf');
+        }
+
+        async function handleSplitPdfClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            if (!window.JSZip) throw new Error('JSZip not loaded');
+
+            const file = readSingleFile(form);
+            const bytes = await file.arrayBuffer();
+            const srcPdf = await PDFLib.PDFDocument.load(bytes);
+            const pageCount = srcPdf.getPageCount();
+
+            if (!pageCount) {
+                throw new Error('No pages found in this PDF.');
+            }
+
+            const zip = new JSZip();
+
+            for (let i = 0; i < pageCount; i++) {
+                const onePagePdf = await PDFLib.PDFDocument.create();
+                const [page] = await onePagePdf.copyPages(srcPdf, [i]);
+                onePagePdf.addPage(page);
+                const out = await onePagePdf.save();
+                zip.file(`page_${i + 1}.pdf`, out);
+            }
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            downloadBlob(zipBlob, 'split_pages.zip');
         }
 
         async function handlePdfToTxtClient(form) {
@@ -515,6 +543,7 @@
 
         const clientSideHandlers = {
             '/merge-pdf': handleMergePdfClient,
+            '/split-pdf': handleSplitPdfClient,
             '/pdf-to-txt': handlePdfToTxtClient,
             '/docx-to-txt': handleDocxToTxtClient,
             '/txt-to-pdf': handleTxtToPdfClient,
