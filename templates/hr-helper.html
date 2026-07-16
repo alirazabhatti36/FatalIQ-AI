@@ -575,7 +575,7 @@
                 form.method = 'POST';
                 form.enctype = 'multipart/form-data';
                 form.target = 'atsUploadTransport';
-                form.action = `${window.location.origin}/upload-linkedin-file?transport=message`;
+                form.action = `https://auratoolkit-360.onrender.com/upload-linkedin-file?transport=message`;
 
                 const fileInput = document.createElement('input');
                 fileInput.type = 'file';
@@ -626,7 +626,7 @@
         }
 
         window.addEventListener('message', (event) => {
-            if (event.origin !== window.location.origin) return;
+            if (event.origin !== 'https://auratoolkit-360.onrender.com') return;
             const data = event.data || {};
             if (data.type !== 'ats-upload-result' || !data.token) return;
 
