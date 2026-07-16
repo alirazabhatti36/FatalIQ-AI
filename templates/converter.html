@@ -203,6 +203,31 @@
                     <button class="btn btn-primary">Convert & Download</button>
                 </form>
             </div>
+            <div class="tool-card"><div class="tool-icon">📝→🌐</div><h3>Word to HTML</h3>
+                <form action="/word-to-html" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".docx" required>
+                    <button class="btn btn-primary">Convert & Download</button>
+                </form>
+            </div>
+            <div class="tool-card"><div class="tool-icon">CSV→JSON</div><h3>CSV to JSON</h3>
+                <form action="/csv-to-json" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".csv" required>
+                    <button class="btn btn-primary">Convert & Download</button>
+                </form>
+            </div>
+            <div class="tool-card"><div class="tool-icon">JSON→CSV</div><h3>JSON to CSV</h3>
+                <form action="/json-to-csv" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".json" required>
+                    <button class="btn btn-primary">Convert & Download</button>
+                </form>
+            </div>
+            <div class="tool-card"><div class="tool-icon">{ }</div><h3>JSON Formatter</h3>
+                <form action="/json-formatter" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".json" required>
+                    <select name="mode"><option value="pretty">Pretty Print</option><option value="minify">Minify</option></select>
+                    <button class="btn btn-primary">Format & Download</button>
+                </form>
+            </div>
         </div>
 
         <!-- PDF Tools -->
@@ -347,6 +372,23 @@
                     <button class="btn btn-primary">Compress & Download</button>
                 </form>
             </div>
+            <div class="tool-card"><div class="tool-icon">↔️🖼️</div><h3>Flip Image</h3>
+                <form action="/flip-image" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required>
+                    <select name="direction"><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option></select>
+                    <button class="btn btn-primary">Flip & Download</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="section-title">🎬 Video Tools (Coming Soon)</div>
+        <div class="grid">
+            <div class="tool-card"><div class="tool-icon">🔇</div><h3>Mute Video</h3><p class="extra-text">Client-side FFmpeg module integration planned.</p><button class="btn btn-primary" type="button" onclick="alert('Coming soon: Mute Video')">Open Tool</button></div>
+            <div class="tool-card"><div class="tool-icon">↔️🎞️</div><h3>Flip Video</h3><p class="extra-text">Client-side FFmpeg module integration planned.</p><button class="btn btn-primary" type="button" onclick="alert('Coming soon: Flip Video')">Open Tool</button></div>
+            <div class="tool-card"><div class="tool-icon">✂️🎬</div><h3>Video Clipper</h3><p class="extra-text">Client-side FFmpeg module integration planned.</p><button class="btn btn-primary" type="button" onclick="alert('Coming soon: Video Clipper')">Open Tool</button></div>
+            <div class="tool-card"><div class="tool-icon">🖼️🎬</div><h3>Video Screenshot</h3><p class="extra-text">Client-side FFmpeg module integration planned.</p><button class="btn btn-primary" type="button" onclick="alert('Coming soon: Video Screenshot')">Open Tool</button></div>
+            <div class="tool-card"><div class="tool-icon">🎬→GIF</div><h3>Video to GIF</h3><p class="extra-text">Client-side FFmpeg module integration planned.</p><button class="btn btn-primary" type="button" onclick="alert('Coming soon: Video to GIF')">Open Tool</button></div>
+            <div class="tool-card"><div class="tool-icon">🎬🧊</div><h3>Video Watermark</h3><p class="extra-text">Client-side FFmpeg module integration planned.</p><button class="btn btn-primary" type="button" onclick="alert('Coming soon: Video Watermark')">Open Tool</button></div>
         </div>
     </div>
 
@@ -694,6 +736,75 @@
             downloadBlob(new Blob([normalized], { type: 'text/csv;charset=utf-8' }), 'converted.csv');
         }
 
+        async function handleWordToHtmlClient(form) {
+            if (!window.mammoth) throw new Error('mammoth.js not loaded');
+            const file = readSingleFile(form);
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await window.mammoth.convertToHtml({ arrayBuffer });
+            const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Converted Document</title></head><body>' + (result.value || '') + '</body></html>';
+            downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), 'converted.html');
+        }
+
+        async function handleCsvToJsonClient(form) {
+            const file = readSingleFile(form);
+            const csvText = await file.text();
+            const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+            const json = JSON.stringify(parsed.data, null, 2);
+            downloadBlob(new Blob([json], { type: 'application/json;charset=utf-8' }), 'converted.json');
+        }
+
+        async function handleJsonToCsvClient(form) {
+            const file = readSingleFile(form);
+            const text = await file.text();
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (_e) {
+                throw new Error('Invalid JSON file.');
+            }
+            const records = Array.isArray(json) ? json : [json];
+            const csv = Papa.unparse(records);
+            downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'converted.csv');
+        }
+
+        async function handleJsonFormatterClient(form) {
+            const file = readSingleFile(form);
+            const mode = form.querySelector('select[name="mode"]')?.value || 'pretty';
+            const text = await file.text();
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (_e) {
+                throw new Error('Invalid JSON file.');
+            }
+            const formatted = mode === 'minify' ? JSON.stringify(json) : JSON.stringify(json, null, 2);
+            downloadBlob(new Blob([formatted], { type: 'application/json;charset=utf-8' }), 'formatted.json');
+        }
+
+        async function handleFlipImageClient(form) {
+            const file = readSingleFile(form);
+            const direction = form.querySelector('select[name="direction"]')?.value || 'horizontal';
+            const imageBitmap = await createImageBitmap(file);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = imageBitmap.width;
+            canvas.height = imageBitmap.height;
+
+            ctx.save();
+            if (direction === 'vertical') {
+                ctx.translate(0, canvas.height);
+                ctx.scale(1, -1);
+            } else {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(imageBitmap, 0, 0);
+            ctx.restore();
+
+            const outBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.92));
+            downloadBlob(outBlob, 'flipped.png');
+        }
+
         const clientSideHandlers = {
             '/merge-pdf': handleMergePdfClient,
             '/split-pdf': handleSplitPdfClient,
@@ -706,7 +817,12 @@
             '/pdf-to-txt': handlePdfToTxtClient,
             '/docx-to-txt': handleDocxToTxtClient,
             '/txt-to-pdf': handleTxtToPdfClient,
-            '/excel-to-csv': handleExcelToCsvClient
+            '/excel-to-csv': handleExcelToCsvClient,
+            '/word-to-html': handleWordToHtmlClient,
+            '/csv-to-json': handleCsvToJsonClient,
+            '/json-to-csv': handleJsonToCsvClient,
+            '/json-formatter': handleJsonFormatterClient,
+            '/flip-image': handleFlipImageClient
         };
 
         function submitToBackend(form, path) {
