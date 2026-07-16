@@ -458,6 +458,159 @@
             downloadBlob(zipBlob, 'split_pages.zip');
         }
 
+        function parsePageSelection(selection, totalPages) {
+            if (!selection || !selection.trim()) {
+                throw new Error('Please provide page numbers (e.g. 1,3,5-7).');
+            }
+
+            const selected = new Set();
+            const parts = selection.split(',').map(p => p.trim()).filter(Boolean);
+
+            for (const part of parts) {
+                if (part.includes('-')) {
+                    const [startRaw, endRaw] = part.split('-').map(v => parseInt(v.trim(), 10));
+                    if (Number.isNaN(startRaw) || Number.isNaN(endRaw)) {
+                        throw new Error('Invalid page range format.');
+                    }
+                    const start = Math.min(startRaw, endRaw);
+                    const end = Math.max(startRaw, endRaw);
+                    for (let p = start; p <= end; p++) {
+                        if (p >= 1 && p <= totalPages) selected.add(p - 1);
+                    }
+                } else {
+                    const pageNo = parseInt(part, 10);
+                    if (!Number.isNaN(pageNo) && pageNo >= 1 && pageNo <= totalPages) {
+                        selected.add(pageNo - 1);
+                    }
+                }
+            }
+
+            if (!selected.size) {
+                throw new Error('No valid page numbers found.');
+            }
+
+            return selected;
+        }
+
+        async function handleRotatePdfClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            const file = readSingleFile(form);
+            const degreesInput = parseInt(form.querySelector('select[name="degrees"]')?.value || '90', 10);
+            const bytes = await file.arrayBuffer();
+            const srcPdf = await PDFLib.PDFDocument.load(bytes);
+            const outPdf = await PDFLib.PDFDocument.create();
+            const pages = await outPdf.copyPages(srcPdf, srcPdf.getPageIndices());
+
+            pages.forEach(page => {
+                page.setRotation(PDFLib.degrees(degreesInput));
+                outPdf.addPage(page);
+            });
+
+            const output = await outPdf.save();
+            downloadBlob(new Blob([output], { type: 'application/pdf' }), 'rotated.pdf');
+        }
+
+        async function handleDeletePagesClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            const file = readSingleFile(form);
+            const bytes = await file.arrayBuffer();
+            const srcPdf = await PDFLib.PDFDocument.load(bytes);
+            const totalPages = srcPdf.getPageCount();
+            const deleteSelection = parsePageSelection(form.querySelector('input[name="pages"]')?.value || '', totalPages);
+
+            const keepIndices = srcPdf.getPageIndices().filter(i => !deleteSelection.has(i));
+            if (!keepIndices.length) {
+                throw new Error('Cannot delete all pages.');
+            }
+
+            const outPdf = await PDFLib.PDFDocument.create();
+            const keptPages = await outPdf.copyPages(srcPdf, keepIndices);
+            keptPages.forEach(page => outPdf.addPage(page));
+
+            const output = await outPdf.save();
+            downloadBlob(new Blob([output], { type: 'application/pdf' }), 'deleted_pages.pdf');
+        }
+
+        async function handleExtractPagesClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            const file = readSingleFile(form);
+            const bytes = await file.arrayBuffer();
+            const srcPdf = await PDFLib.PDFDocument.load(bytes);
+            const totalPages = srcPdf.getPageCount();
+            const extractSelection = parsePageSelection(form.querySelector('input[name="pages"]')?.value || '', totalPages);
+
+            const outPdf = await PDFLib.PDFDocument.create();
+            const orderedIndices = srcPdf.getPageIndices().filter(i => extractSelection.has(i));
+            const pages = await outPdf.copyPages(srcPdf, orderedIndices);
+            pages.forEach(page => outPdf.addPage(page));
+
+            const output = await outPdf.save();
+            downloadBlob(new Blob([output], { type: 'application/pdf' }), 'extracted_pages.pdf');
+        }
+
+        async function handleWatermarkPdfClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            const file = readSingleFile(form);
+            const watermarkText = (form.querySelector('input[name="watermark"]')?.value || '').trim() || 'CONFIDENTIAL';
+            const bytes = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+            const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+            pdfDoc.getPages().forEach(page => {
+                const { width, height } = page.getSize();
+                const fontSize = Math.max(26, Math.min(48, Math.floor(width / 10)));
+                const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+                page.drawText(watermarkText, {
+                    x: (width - textWidth) / 2,
+                    y: height / 2,
+                    size: fontSize,
+                    font,
+                    color: PDFLib.rgb(0.55, 0.55, 0.55),
+                    opacity: 0.35,
+                    rotate: PDFLib.degrees(35)
+                });
+            });
+
+            const output = await pdfDoc.save();
+            downloadBlob(new Blob([output], { type: 'application/pdf' }), 'watermarked.pdf');
+        }
+
+        async function handleAddPageNumbersClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            const file = readSingleFile(form);
+            const bytes = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+            const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+            const pages = pdfDoc.getPages();
+            const total = pages.length;
+
+            pages.forEach((page, index) => {
+                const { width } = page.getSize();
+                const label = `Page ${index + 1} of ${total}`;
+                const size = 10;
+                const textWidth = font.widthOfTextAtSize(label, size);
+                page.drawText(label, {
+                    x: (width - textWidth) / 2,
+                    y: 16,
+                    size,
+                    font,
+                    color: PDFLib.rgb(0.35, 0.35, 0.35)
+                });
+            });
+
+            const output = await pdfDoc.save();
+            downloadBlob(new Blob([output], { type: 'application/pdf' }), 'numbered.pdf');
+        }
+
+        async function handleCompressPdfClient(form) {
+            if (!window.PDFLib) throw new Error('pdf-lib not loaded');
+            const file = readSingleFile(form);
+            const bytes = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+            const output = await pdfDoc.save({ useObjectStreams: true });
+            downloadBlob(new Blob([output], { type: 'application/pdf' }), 'compressed.pdf');
+        }
+
         async function handlePdfToTxtClient(form) {
             if (!window.pdfjsLib) throw new Error('pdf.js not loaded');
             const file = readSingleFile(form);
@@ -544,6 +697,12 @@
         const clientSideHandlers = {
             '/merge-pdf': handleMergePdfClient,
             '/split-pdf': handleSplitPdfClient,
+            '/compress-pdf': handleCompressPdfClient,
+            '/rotate-pdf': handleRotatePdfClient,
+            '/watermark-pdf': handleWatermarkPdfClient,
+            '/delete-pages': handleDeletePagesClient,
+            '/extract-pages': handleExtractPagesClient,
+            '/add-page-numbers': handleAddPageNumbersClient,
             '/pdf-to-txt': handlePdfToTxtClient,
             '/docx-to-txt': handleDocxToTxtClient,
             '/txt-to-pdf': handleTxtToPdfClient,
