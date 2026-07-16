@@ -75,6 +75,15 @@ PAGE_TEMPLATES = {
     'disclaimer': 'disclaimer.html',
 }
 
+BLOG_POST_TEMPLATES = {
+    'ats-resume-keywords-guide-2026': 'blog/ats-resume-keywords-guide-2026.html',
+    'resume-summary-examples-for-freshers': 'blog/resume-summary-examples-for-freshers.html',
+    'linkedin-headline-formula-with-examples': 'blog/linkedin-headline-formula-with-examples.html',
+    'pdf-to-word-formatting-fixes': 'blog/pdf-to-word-formatting-fixes.html',
+    'hr-shortlisting-checklist-small-teams': 'blog/hr-shortlisting-checklist-small-teams.html',
+    'privacy-first-file-conversion-guide': 'blog/privacy-first-file-conversion-guide.html',
+}
+
 def save(file, name):
     path = os.path.join(UPLOAD, name)
     file.save(path)
@@ -229,6 +238,16 @@ def about():
 @app.route('/templates/blogs.html')
 def blogs():
     return render_template('blogs.html')
+
+@app.route('/blogs/<slug>')
+@app.route('/blogs/<slug>.html')
+def blog_post(slug):
+    if slug.endswith('.html'):
+        slug = slug[:-5]
+    template_name = BLOG_POST_TEMPLATES.get(slug)
+    if not template_name:
+        abort(404)
+    return render_template(template_name)
 
 @app.route('/disclaimer')
 @app.route('/disclaimer.html')

@@ -124,6 +124,18 @@
         
         .field-selector { background: #f8fafc; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid rgba(226,232,240,0.5); }
         .field-selector label { font-weight: 600; color: #475569; }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+            white-space: nowrap;
+        }
         
         #grammarSuggestions { margin-top:1rem; background:#f1f5f9; border-radius:12px; padding:0.75rem; display:none; border-left:4px solid #f59e0b; }
         
@@ -185,6 +197,7 @@
         </div>
     </nav>
 
+    <h1 class="sr-only">Resume Builder and ATS Checker</h1>
     <div class="container">
         <div class="builder-layout">
             <!-- LEFT: Form Panel -->
