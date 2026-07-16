@@ -8,6 +8,7 @@ import importlib
 import time
 import csv
 import html
+import textwrap
 
 # --- LinkedIn Optimizer import HATAYA ---
 # from linkedin_optimizer import analyze_linkedin_profile, fetch_profile_from_url
@@ -166,6 +167,41 @@ def extract_text_from_supported_file(path, ext=None):
                             continue
         return '\n'.join(filter(None, combined_text))
     return ''
+
+def render_docx_text_to_pdf(docx_path, output_pdf_path):
+    reportlab_canvas = importlib.import_module('reportlab.pdfgen.canvas')
+    reportlab_pagesizes = importlib.import_module('reportlab.lib.pagesizes')
+    pdfmetrics = importlib.import_module('reportlab.pdfbase.pdfmetrics')
+
+    page_width, page_height = reportlab_pagesizes.A4
+    canvas = reportlab_canvas.Canvas(output_pdf_path, pagesize=reportlab_pagesizes.A4)
+    canvas.setTitle('Converted Document')
+
+    font_name = 'Helvetica'
+    font_size = 11
+    line_height = 14
+    margin_x = 40
+    margin_y = 40
+    y = page_height - margin_y
+
+    canvas.setFont(font_name, font_size)
+    # Approximate character capacity for line wrapping based on font metrics.
+    max_line_width = page_width - (2 * margin_x)
+    avg_char_width = pdfmetrics.stringWidth('M', font_name, font_size)
+    wrap_width = max(40, int(max_line_width / max(avg_char_width, 1)))
+
+    text = extract_text_from_docx(docx_path)
+    for paragraph in text.splitlines() if text else ['']:
+        wrapped_lines = textwrap.wrap(paragraph.strip(), width=wrap_width) if paragraph.strip() else ['']
+        for line in wrapped_lines:
+            if y <= margin_y:
+                canvas.showPage()
+                canvas.setFont(font_name, font_size)
+                y = page_height - margin_y
+            canvas.drawString(margin_x, y, line)
+            y -= line_height
+
+    canvas.save()
 
 def score_resume_against_job_description(resume_text, job_desc):
     resume_words = set(normalize_ats_text(resume_text))
@@ -440,13 +476,18 @@ def export_resume_docx():
 # ─────────────────────────────────────────
 @app.route('/word-to-pdf', methods=['POST'])
 def word_to_pdf():
-    if not is_windows_runtime():
-        return windows_only_response('Word to PDF')
     try:
-        docx2pdf = importlib.import_module('docx2pdf')
-        docx_to_pdf = docx2pdf.convert
         p = save(request.files['file'], 'input.docx')
-        docx_to_pdf(p, os.path.join(UPLOAD,'output.pdf'))
+        out = os.path.join(UPLOAD, 'output.pdf')
+
+        if is_windows_runtime():
+            docx2pdf = importlib.import_module('docx2pdf')
+            docx_to_pdf = docx2pdf.convert
+            docx_to_pdf(p, out)
+        else:
+            # Linux fallback for Render: preserves readable text content.
+            render_docx_text_to_pdf(p, out)
+
         return send_file(os.path.join(UPLOAD,'output.pdf'), as_attachment=True, download_name='converted.pdf')
     except Exception as e:
         return jsonify({'error': f'Word to PDF failed: {str(e)}'}), 500
